@@ -1,10 +1,9 @@
 """Pytest configuration and shared fixtures."""
 
-import json
-import os
 import tempfile
 from pathlib import Path
 from unittest.mock import Mock
+
 import pytest
 
 
@@ -24,9 +23,9 @@ def sample_config():
                 "channel": "#test-alerts",
                 "webhookUrl": "https://hooks.slack.com/test",
                 "username": "Test Monitor",
-                "iconEmoji": ":test:"
-            }
-        }
+                "iconEmoji": ":test:",
+            },
+        },
     }
 
 
@@ -41,7 +40,7 @@ def sample_issues():
             "repository": "owner/repo",
             "user": "reporter1",
             "created_at": "2024-01-15T14:30:00Z",
-            "body": "This is a detailed description of the security issue..."
+            "body": "This is a detailed description of the security issue...",
         },
         {
             "id": 67890,
@@ -50,8 +49,8 @@ def sample_issues():
             "repository": "another/repo",
             "user": "reporter2",
             "created_at": "2024-01-15T15:45:00Z",
-            "body": "Bug description here"
-        }
+            "body": "Bug description here",
+        },
     ]
 
 
