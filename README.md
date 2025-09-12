@@ -29,9 +29,10 @@ Copy `configs/example-template.json` and customize:
 
 ```json
 {
-  "name": "fedora-iot",
+  "name": "my-monitor",
   "searchPhrases": [
-    "Fedora IoT"
+    "security vulnerability",
+    "critical bug"
   ],
   "excludedRepos": [
     "spam-owner/test-repo"
@@ -46,7 +47,7 @@ Copy `configs/example-template.json` and customize:
     },
     "slack": {
       "enabled": false,
-      "channel": "#fedora-iot-alerts"
+      "channel": "#alerts"
     }
   }
 }
@@ -54,7 +55,7 @@ Copy `configs/example-template.json` and customize:
 
 ### 3. Use the GitHub Issues Workflow
 
-Use `.github/workflows/fedora-iot-monitor-github.yml` which creates GitHub issues for notifications.
+Use `.github/workflows/security-monitor-example.yml` which creates GitHub issues for notifications.
 
 ## How It Works
 
@@ -68,11 +69,11 @@ Use `.github/workflows/fedora-iot-monitor-github.yml` which creates GitHub issue
 When new issues are found, a GitHub issue is created like:
 
 ```markdown
-# 🔍 3 new Fedora IoT issues found - 2024-01-15
+# 🔍 3 new issues found - 2024-01-15
 
-Found 3 new GitHub issues matching **"Fedora IoT"**:
+Found 3 new GitHub issues matching keywords:
 
-## 📋 [Boot failure on Raspberry Pi with Fedora IoT](https://github.com/owner/repo/issues/123)
+## 📋 [Critical security vulnerability in authentication](https://github.com/owner/repo/issues/123)
 
 - **Repository:** `owner/repo`
 - **Author:** [@username](https://github.com/username)
@@ -80,11 +81,11 @@ Found 3 new GitHub issues matching **"Fedora IoT"**:
 - **Link:** https://github.com/owner/repo/issues/123
 
 **Preview:**
-> System fails to boot after updating to latest Fedora IoT image...
+> Found a critical security vulnerability that allows unauthorized access...
 
 ---
 
-## 📋 [Security vulnerability in IoT image](https://github.com/another/repo/issues/456)
+## 📋 [Security vulnerability in API endpoint](https://github.com/another/repo/issues/456)
 
 - **Repository:** `another/repo`
 - **Author:** [@security-researcher](https://github.com/security-researcher)
@@ -93,7 +94,7 @@ Found 3 new GitHub issues matching **"Fedora IoT"**:
 
 ---
 
-*This issue was automatically created by the Fedora IoT monitor on 2024-01-15*
+*This issue was automatically created by the GitHub issue monitor on 2024-01-15*
 ```
 
 ## Getting Notifications
@@ -109,8 +110,8 @@ You'll automatically get GitHub notifications for new issues created in your rep
 
 | Field | Description | Example |
 |-------|-------------|---------|
-| `name` | Unique identifier for this monitor | `"fedora-iot"` |
-| `searchPhrases` | Array of phrases to search for | `["Fedora IoT", "security issue"]` |
+| `name` | Unique identifier for this monitor | `"my-monitor"` |
+| `searchPhrases` | Array of phrases to search for | `["security vulnerability", "critical bug"]` |
 | `excludedRepos` | Repositories to ignore | `["owner/repo"]` |
 | `excludedOrgs` | Organizations to ignore | `["spam-org"]` |
 | `lookbackHours` | How far back to search (hours) | `24` |
@@ -135,7 +136,7 @@ Test your configuration manually:
 ```bash
 # Set environment variables
 export GITHUB_TOKEN="your_token"
-export CONFIG_FILE="configs/fedora-iot.json"
+export CONFIG_FILE="configs/security-example.json"
 
 # Install dependencies
 pip install -r requirements.txt
@@ -165,7 +166,7 @@ Common cron schedules:
 ## Labels
 
 Issues are automatically labeled with:
-- `fedora-iot-monitor` - Identifies the monitor type
+- `github-monitor` - Identifies the monitor type
 - `notification` - Marks as automated notification
 - `auto-created` - Indicates automated creation
 
