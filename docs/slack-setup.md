@@ -35,12 +35,12 @@ This guide shows how to set up Slack notifications for your GitHub issue monitor
 
 ## Step 2: Configure Your Monitor
 
-Edit your config file (e.g., `configs/fedora-iot.json`):
+Edit your config file (e.g., `configs/security-example.json`):
 
 ```json
 {
-  "name": "fedora-iot",
-  "searchPhrases": ["Fedora IoT"],
+  "name": "security-monitor",
+  "searchPhrases": ["security vulnerability", "CVE-"],
   "excludedRepos": [],
   "excludedOrgs": [],
   "lookbackHours": 24,
@@ -51,9 +51,9 @@ Edit your config file (e.g., `configs/fedora-iot.json`):
     "slack": {
       "enabled": true,
       "webhookUrl": "",
-      "channel": "#fedora-iot-alerts", 
+      "channel": "#security-alerts", 
       "username": "GitHub Monitor",
-      "iconEmoji": ":mag:"
+      "iconEmoji": ":warning:"
     }
   }
 }
@@ -86,7 +86,7 @@ Edit your config file (e.g., `configs/fedora-iot.json`):
 # Set environment variables
 export GITHUB_TOKEN="your_github_token"
 export SLACK_WEBHOOK_URL="your_webhook_url"
-export CONFIG_FILE="configs/fedora-iot.json"
+export CONFIG_FILE="configs/security-example.json"
 
 # Run the monitor
 python src/monitor_github_notify.py
@@ -172,5 +172,5 @@ This gives you:
 Consider creating dedicated channels:
 - `#github-alerts` - General GitHub notifications
 - `#security-alerts` - Security-related issues  
-- `#fedora-iot` - Fedora IoT specific issues
+- `#project-mentions` - Project-specific mentions
 - `#bot-notifications` - All automated notifications
