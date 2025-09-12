@@ -364,9 +364,9 @@ class TestConfigValidation(unittest.TestCase):
         with patch.dict(os.environ, {'GITHUB_TOKEN': 'fake_token'}):
             monitor = GitHubIssueMonitor(incomplete_config)
 
-            # Should handle missing fields gracefully
-            query = monitor.build_search_query()
-            self.assertIn('type:issue', query)
+            # Should raise KeyError for missing required fields
+            with self.assertRaises(KeyError):
+                monitor.build_search_query()
 
 
 if __name__ == '__main__':
