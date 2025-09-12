@@ -1,4 +1,4 @@
-name: Security Monitor Example
+name: Example Monitor
 
 on:
   schedule:
@@ -28,7 +28,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          CONFIG_FILE: 'configs/security-example.json'
+          CONFIG_FILE: 'configs/example-template.json'
         run: |
           python src/monitor_github_notify.py
           if [ -f new_issues.json ]; then
@@ -47,26 +47,26 @@ jobs:
             const fs = require('fs');
             const newIssues = JSON.parse(fs.readFileSync('new_issues.json', 'utf8'));
             const today = new Date().toISOString().split('T')[0];
-            
+
             let body = `Found ${newIssues.length} new GitHub issue${newIssues.length > 1 ? 's' : ''} matching keywords:\n\n`;
-            
+
             for (const issue of newIssues) {
               body += `## 📋 [${issue.title}](${issue.html_url})\n\n`;
               body += `- **Repository:** \`${issue.repository}\`\n`;
               body += `- **Author:** [@${issue.user}](https://github.com/${issue.user})\n`;
               body += `- **Created:** ${new Date(issue.created_at).toLocaleString()}\n`;
               body += `- **Link:** ${issue.html_url}\n\n`;
-              
+
               if (issue.body && issue.body.length > 0) {
                 const preview = issue.body.substring(0, 200);
                 body += `**Preview:**\n> ${preview}${issue.body.length > 200 ? '...' : ''}\n\n`;
               }
-              
+
               body += `---\n\n`;
             }
-            
+
             body += `\n*This issue was automatically created by the GitHub issue monitor on ${today}*`;
-            
+
             await github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -74,5 +74,5 @@ jobs:
               body: body,
               labels: ['github-monitor', 'notification', 'auto-created']
             });
-            
+
             console.log(`✅ Created GitHub issue for ${newIssues.length} new findings`);
