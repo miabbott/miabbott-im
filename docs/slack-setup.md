@@ -5,7 +5,7 @@ This guide shows how to set up Slack notifications for your GitHub issue monitor
 ## Quick Setup
 
 1. **Create Slack App & Webhook**
-2. **Configure your monitor**  
+2. **Configure your monitor**
 3. **Add webhook URL to GitHub secrets**
 4. **Test the integration**
 
@@ -35,7 +35,7 @@ This guide shows how to set up Slack notifications for your GitHub issue monitor
 
 ## Step 2: Configure Your Monitor
 
-Edit your config file (e.g., `configs/security-example.json`):
+Edit your config file (e.g., `configs/example-template.json`):
 
 ```json
 {
@@ -51,7 +51,7 @@ Edit your config file (e.g., `configs/security-example.json`):
     "slack": {
       "enabled": true,
       "webhookUrl": "",
-      "channel": "#security-alerts", 
+      "channel": "#security-alerts",
       "username": "GitHub Monitor",
       "iconEmoji": ":warning:"
     }
@@ -86,7 +86,7 @@ Edit your config file (e.g., `configs/security-example.json`):
 # Set environment variables
 export GITHUB_TOKEN="your_github_token"
 export SLACK_WEBHOOK_URL="your_webhook_url"
-export CONFIG_FILE="configs/security-example.json"
+export CONFIG_FILE="configs/example-template.json"
 
 # Run the monitor
 python src/monitor_github_notify.py
@@ -108,7 +108,7 @@ Slack notifications include:
 - **Issue blocks** (up to 10):
   - Clickable issue title
   - Repository link
-  - Author link  
+  - Author link
   - Creation date
   - "View Issue" button
 - **Overflow indicator** if more than 10 issues
@@ -171,6 +171,6 @@ This gives you:
 
 Consider creating dedicated channels:
 - `#github-alerts` - General GitHub notifications
-- `#security-alerts` - Security-related issues  
+- `#security-alerts` - Security-related issues
 - `#project-mentions` - Project-specific mentions
 - `#bot-notifications` - All automated notifications
