@@ -1,6 +1,6 @@
 # GitHub Issue Monitor (GitHub Issues Notifications)
 
-A template-based GitHub Actions tool for monitoring GitHub issues and creating GitHub issue notifications. **No email credentials required!**
+A template-based GitHub Actions tool for monitoring GitHub issues and creating GitHub issue notifications.
 
 ## Features
 
@@ -17,7 +17,7 @@ A template-based GitHub Actions tool for monitoring GitHub issues and creating G
 
 ### 1. Repository Setup
 
-**No email credentials needed!** The tool creates GitHub issues for notifications.
+The tool creates GitHub issues for notifications.
 
 Simply ensure your repository has:
 - Issues enabled (Settings → Features → Issues)
@@ -55,7 +55,7 @@ Copy `configs/example-template.json` and customize:
 
 ### 3. Use the GitHub Issues Workflow
 
-Use `.github/workflows/security-monitor-example.yml` which creates GitHub issues for notifications.
+Use `.github/workflows/keyword-example.yml` which creates GitHub issues for notifications.
 
 ## How It Works
 
@@ -136,7 +136,7 @@ Test your configuration manually:
 ```bash
 # Set environment variables
 export GITHUB_TOKEN="your_token"
-export CONFIG_FILE="configs/security-example.json"
+export CONFIG_FILE="configs/example-template.json"
 
 # Install dependencies
 pip install -r requirements.txt
@@ -145,21 +145,12 @@ pip install -r requirements.txt
 python src/monitor_github_notify.py
 ```
 
-## Advantages Over Email
-
-✅ **No setup required** - works out of the box  
-✅ **Free forever** - no external service limits  
-✅ **Rich formatting** - markdown, links, previews  
-✅ **Searchable** - GitHub's powerful issue search  
-✅ **Collaborative** - others can comment and discuss  
-✅ **Mobile notifications** - via GitHub mobile app  
-✅ **Persistent** - permanent record of all findings  
 
 ## Scheduling Options
 
 Common cron schedules:
 - `'0 * * * *'` - Every hour
-- `'0 */2 * * *'` - Every 2 hours  
+- `'0 */2 * * *'` - Every 2 hours
 - `'0 9,17 * * *'` - 9 AM and 5 PM daily
 - `'0 9 * * MON-FRI'` - 9 AM weekdays only
 
