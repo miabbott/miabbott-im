@@ -27,6 +27,7 @@ jobs:
         id: monitor
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           CONFIG_FILE: 'configs/fedora-iot.json'
         run: |
           python src/monitor_github_notify.py

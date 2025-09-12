@@ -6,6 +6,7 @@ A template-based GitHub Actions tool for monitoring GitHub issues and creating G
 
 - 🔍 **Flexible Search**: Monitor issues by search phrases across all of GitHub
 - 📋 **GitHub Issue Notifications**: Creates issues in your repo with findings
+- 💬 **Slack Integration**: Optional real-time Slack notifications ([setup guide](docs/slack-setup.md))
 - 🚫 **Smart Exclusions**: Exclude specific repositories and organizations
 - ⚙️ **Template-Based**: Easy to create multiple monitors for different topics
 - 🤖 **GitHub Actions**: Runs automatically on schedule using free GitHub Actions
@@ -38,7 +39,16 @@ Copy `configs/example-template.json` and customize:
   "excludedOrgs": [
     "spam-organization"
   ],
-  "lookbackHours": 24
+  "lookbackHours": 24,
+  "notifications": {
+    "githubIssues": {
+      "enabled": true
+    },
+    "slack": {
+      "enabled": false,
+      "channel": "#fedora-iot-alerts"
+    }
+  }
 }
 ```
 
@@ -104,6 +114,11 @@ You'll automatically get GitHub notifications for new issues created in your rep
 | `excludedRepos` | Repositories to ignore | `["owner/repo"]` |
 | `excludedOrgs` | Organizations to ignore | `["spam-org"]` |
 | `lookbackHours` | How far back to search (hours) | `24` |
+| `notifications.githubIssues.enabled` | Enable GitHub issue creation | `true` |
+| `notifications.slack.enabled` | Enable Slack notifications | `false` |
+| `notifications.slack.channel` | Slack channel for notifications | `"#alerts"` |
+
+**For Slack setup**, see the [detailed Slack integration guide](docs/slack-setup.md).
 
 ## Multiple Monitors
 

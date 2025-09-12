@@ -13,5 +13,17 @@
     "organization-to-exclude",
     "another-org"
   ],
-  "lookbackHours": 24
+  "lookbackHours": 24,
+  "notifications": {
+    "githubIssues": {
+      "enabled": true
+    },
+    "slack": {
+      "enabled": false,
+      "webhookUrl": "",
+      "channel": "#alerts",
+      "username": "GitHub Monitor",
+      "iconEmoji": ":mag:"
+    }
+  }
 }

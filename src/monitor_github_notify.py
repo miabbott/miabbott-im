@@ -2,6 +2,7 @@
 
 import os
 import json
+import requests
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import List, Dict, Any
@@ -95,6 +96,92 @@ class GitHubIssueMonitor:
         
         return False
     
+    def send_slack_notification(self, issues: List[Dict[str, Any]]):
+        """Send Slack notification with new issues."""
+        slack_config = self.config.get('notifications', {}).get('slack', {})
+        
+        if not slack_config.get('enabled', False):
+            return
+        
+        webhook_url = slack_config.get('webhookUrl') or os.getenv('SLACK_WEBHOOK_URL')
+        if not webhook_url:
+            print("⚠️  Slack enabled but no webhook URL configured")
+            return
+        
+        # Build Slack message
+        count = len(issues)
+        phrases = ', '.join(f'"{phrase}"' for phrase in self.config['searchPhrases'])
+        
+        # Create rich Slack message with blocks
+        blocks = [
+            {
+                "type": "header",
+                "text": {
+                    "type": "plain_text",
+                    "text": f"🔍 {count} new GitHub issue{'s' if count > 1 else ''} found!"
+                }
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": f"Found *{count}* new GitHub issue{'s' if count > 1 else ''} matching {phrases}"
+                }
+            },
+            {"type": "divider"}
+        ]
+        
+        # Add each issue as a block (limit to 10 for Slack limits)
+        for issue in issues[:10]:
+            repo_link = f"<https://github.com/{issue['repository']}|{issue['repository']}>"
+            issue_link = f"<{issue['html_url']}|{issue['title']}>"
+            author_link = f"<https://github.com/{issue['user']}|@{issue['user']}>"
+            created_date = datetime.fromisoformat(issue['created_at'].replace('Z', '+00:00')).strftime('%Y-%m-%d %H:%M UTC')
+            
+            blocks.append({
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": f"*{issue_link}*\n📁 {repo_link} | 👤 {author_link} | 📅 {created_date}"
+                },
+                "accessory": {
+                    "type": "button",
+                    "text": {
+                        "type": "plain_text",
+                        "text": "View Issue"
+                    },
+                    "url": issue['html_url'],
+                    "action_id": f"view_issue_{issue['id']}"
+                }
+            })
+        
+        if len(issues) > 10:
+            blocks.append({
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": f"_... and {len(issues) - 10} more issue{'s' if len(issues) - 10 > 1 else ''}_"
+                }
+            })
+        
+        # Prepare Slack payload
+        payload = {
+            "username": slack_config.get('username', 'GitHub Monitor'),
+            "icon_emoji": slack_config.get('iconEmoji', ':mag:'),
+            "blocks": blocks
+        }
+        
+        # Add channel if specified
+        if channel := slack_config.get('channel'):
+            payload['channel'] = channel
+        
+        try:
+            response = requests.post(webhook_url, json=payload, timeout=10)
+            response.raise_for_status()
+            print(f"✅ Slack notification sent for {count} issues")
+        except requests.exceptions.RequestException as e:
+            print(f"❌ Failed to send Slack notification: {e}")
+
     def save_new_issues(self, issues: List[Dict[str, Any]]):
         """Save new issues to JSON file for GitHub Actions to process."""
         if issues:
@@ -122,8 +209,13 @@ class GitHubIssueMonitor:
             print(f"🆕 {len(new_issues)} new issues to notify about")
             
             if new_issues:
-                # Save new issues for GitHub Actions to process
-                self.save_new_issues(new_issues)
+                # Send notifications
+                self.send_slack_notification(new_issues)
+                
+                # Save new issues for GitHub Actions to process (GitHub Issues)
+                github_issues_config = self.config.get('notifications', {}).get('githubIssues', {})
+                if github_issues_config.get('enabled', True):  # Default to enabled for backward compatibility
+                    self.save_new_issues(new_issues)
                 
                 # Update cache
                 cache['notified_issues'].extend(issue['id'] for issue in new_issues)

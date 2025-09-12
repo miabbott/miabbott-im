@@ -11,5 +11,17 @@
     "spam-org",
     "test-organization"
   ],
-  "lookbackHours": 24
+  "lookbackHours": 24,
+  "notifications": {
+    "githubIssues": {
+      "enabled": true
+    },
+    "slack": {
+      "enabled": false,
+      "webhookUrl": "",
+      "channel": "#fedora-iot-alerts",
+      "username": "GitHub Monitor",
+      "iconEmoji": ":mag:"
+    }
+  }
 }
