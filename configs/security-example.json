@@ -1,15 +1,17 @@
 {
-  "name": "fedora-iot",
+  "name": "security-monitor",
   "searchPhrases": [
-    "Fedora IoT"
+    "security vulnerability",
+    "CVE-",
+    "security issue"
   ],
   "excludedRepos": [
     "example/test-repo",
-    "spam/repository"
+    "spam-owner/spam-repo"
   ],
   "excludedOrgs": [
-    "spam-org",
-    "test-organization"
+    "test-organization",
+    "spam-org"
   ],
   "lookbackHours": 24,
   "notifications": {
@@ -19,9 +21,9 @@
     "slack": {
       "enabled": false,
       "webhookUrl": "",
-      "channel": "#fedora-iot-alerts",
+      "channel": "#security-alerts",
       "username": "GitHub Monitor",
-      "iconEmoji": ":mag:"
+      "iconEmoji": ":warning:"
     }
   }
 }

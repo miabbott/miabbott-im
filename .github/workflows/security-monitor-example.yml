@@ -1,4 +1,4 @@
-name: Fedora IoT Monitor (GitHub Issues)
+name: Security Monitor Example
 
 on:
   schedule:
@@ -28,7 +28,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          CONFIG_FILE: 'configs/fedora-iot.json'
+          CONFIG_FILE: 'configs/security-example.json'
         run: |
           python src/monitor_github_notify.py
           if [ -f new_issues.json ]; then
@@ -48,7 +48,7 @@ jobs:
             const newIssues = JSON.parse(fs.readFileSync('new_issues.json', 'utf8'));
             const today = new Date().toISOString().split('T')[0];
             
-            let body = `Found ${newIssues.length} new GitHub issue${newIssues.length > 1 ? 's' : ''} matching **"Fedora IoT"**:\n\n`;
+            let body = `Found ${newIssues.length} new GitHub issue${newIssues.length > 1 ? 's' : ''} matching keywords:\n\n`;
             
             for (const issue of newIssues) {
               body += `## 📋 [${issue.title}](${issue.html_url})\n\n`;
@@ -65,14 +65,14 @@ jobs:
               body += `---\n\n`;
             }
             
-            body += `\n*This issue was automatically created by the Fedora IoT monitor on ${today}*`;
+            body += `\n*This issue was automatically created by the GitHub issue monitor on ${today}*`;
             
             await github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              title: `🔍 ${newIssues.length} new Fedora IoT issue${newIssues.length > 1 ? 's' : ''} found - ${today}`,
+              title: `🔍 ${newIssues.length} new issue${newIssues.length > 1 ? 's' : ''} found - ${today}`,
               body: body,
-              labels: ['fedora-iot-monitor', 'notification', 'auto-created']
+              labels: ['github-monitor', 'notification', 'auto-created']
             });
             
             console.log(`✅ Created GitHub issue for ${newIssues.length} new findings`);
