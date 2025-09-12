@@ -1,0 +1,15 @@
+{
+  "name": "fedora-iot",
+  "searchPhrases": [
+    "Fedora IoT"
+  ],
+  "excludedRepos": [
+    "example/test-repo",
+    "spam/repository"
+  ],
+  "excludedOrgs": [
+    "spam-org",
+    "test-organization"
+  ],
+  "lookbackHours": 24
+}

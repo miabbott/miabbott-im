@@ -1,0 +1,17 @@
+{
+  "name": "my-monitor",
+  "searchPhrases": [
+    "search phrase 1",
+    "another phrase",
+    "third phrase"
+  ],
+  "excludedRepos": [
+    "owner/repo-to-exclude",
+    "another-owner/another-repo"
+  ],
+  "excludedOrgs": [
+    "organization-to-exclude",
+    "another-org"
+  ],
+  "lookbackHours": 24
+}
