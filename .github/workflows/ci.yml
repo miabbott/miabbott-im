@@ -1,10 +1,11 @@
+---
 name: CI Pipeline
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
 
 jobs:
@@ -13,239 +14,251 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.9, '3.10', 3.11, 3.12]
+        python-version: [3.11, 3.12]
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python-version }}
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
 
-    - name: Cache pip dependencies
-      uses: actions/cache@v3
-      with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
+      - name: Cache pip dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install -r tests/requirements-test.txt
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r tests/requirements-test.txt
 
-    - name: Code formatting check (Black)
-      run: |
-        black --check --diff src/ tests/
+      - name: Code formatting check (Black)
+        run: |
+          black --check --diff src/ tests/
 
-    - name: Import sorting check (isort)
-      run: |
-        isort --check-only --diff src/ tests/
+      - name: Import sorting check (isort)
+        run: |
+          isort --check-only --diff src/ tests/
 
-    - name: Linting (flake8)
-      run: |
-        flake8 src/ tests/ --count --select=E9,F63,F7,F82 --show-source --statistics
-        flake8 src/ tests/ --count --exit-zero --max-complexity=10 --max-line-length=88 --statistics
+      - name: Linting (flake8)
+        run: |
+          flake8 src/ tests/ --count --select=E9,F63,F7,F82 \
+            --show-source --statistics
+          flake8 src/ tests/ --count --exit-zero --max-complexity=10 \
+            --max-line-length=88 --statistics
 
-    - name: Type checking (mypy)
-      run: |
-        mypy src/ --ignore-missing-imports --strict-optional
+      - name: Type checking (mypy)
+        run: |
+          mypy src/ --ignore-missing-imports --strict-optional
 
-    - name: Security check (bandit)
-      run: |
-        bandit -r src/ -f json -o bandit-report.json || true
-        bandit -r src/ --severity-level medium
+      - name: Security check (bandit)
+        run: |
+          bandit -r src/ -f json -o bandit-report.json || true
+          bandit -r src/ --severity-level medium
 
-    - name: Run unit tests
-      run: |
-        pytest tests/test_monitor.py -v --cov=src --cov-report=xml --cov-report=term-missing
+      - name: Run unit tests
+        run: |
+          pytest tests/test_monitor.py -v --cov=src \
+            --cov-report=xml --cov-report=term-missing
 
-    - name: Run integration tests
-      run: |
-        pytest tests/test_integration.py -v
+      - name: Run integration tests
+        run: |
+          pytest tests/test_integration.py -v
 
-    - name: Upload coverage to Codecov
-      if: matrix.python-version == '3.11'
-      uses: codecov/codecov-action@v3
-      with:
-        file: ./coverage.xml
-        flags: unittests
-        name: codecov-umbrella
+      - name: Upload coverage to Codecov
+        if: matrix.python-version == '3.11'
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella
 
   config-validation:
     name: Configuration Validation
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: 3.11
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
 
-    - name: Validate JSON configs
-      run: |
-        # Validate all JSON files in configs/
-        for file in configs/*.json; do
-          echo "Validating $file"
-          python -m json.tool "$file" > /dev/null
-        done
+      - name: Validate JSON configs
+        run: |
+          # Validate all JSON files in configs/
+          for file in configs/*.json; do
+            echo "Validating $file"
+            python -m json.tool "$file" > /dev/null
+          done
 
-    - name: Validate workflow files
-      run: |
-        # Install yamllint for YAML validation
-        pip install yamllint
-        yamllint .github/workflows/
+      - name: Validate workflow files
+        run: |
+          # Install yamllint for YAML validation
+          pip install yamllint
+          yamllint .github/workflows/
 
   documentation:
     name: Documentation Checks
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Check for broken internal links
-      run: |
-        # Check that all referenced files in documentation exist
-        echo "Checking README.md references..."
+      - name: Check for broken internal links
+        run: |
+          # Check that all referenced files in documentation exist
+          echo "Checking README.md references..."
 
-        # Extract file references from README.md and check they exist
-        grep -o 'configs/[^)]*\.json' README.md | while read file; do
-          if [[ "$file" == *"example"* ]] || [[ "$file" == *"template"* ]]; then
-            if [ ! -f "$file" ]; then
-              echo "✓ Example file reference (expected): $file"
+          # Extract file references from README.md and check they exist
+          grep -o 'configs/[^)]*\.json' README.md | \
+            while read file; do
+            if [[ "$file" == *"example"* ]] || \
+               [[ "$file" == *"template"* ]]; then
+              if [ ! -f "$file" ]; then
+                echo "✓ Example file reference (expected): $file"
+              else
+                echo "✓ Example file exists: $file"
+              fi
             else
-              echo "✓ Example file exists: $file"
+              if [ ! -f "$file" ]; then
+                echo "❌ Missing referenced file: $file"
+                exit 1
+              else
+                echo "✓ Referenced file exists: $file"
+              fi
             fi
-          else
+          done
+
+          # Check workflow references
+          grep -o '\.github/workflows/[^)]*\.yml' README.md | \
+            while read file; do
             if [ ! -f "$file" ]; then
-              echo "❌ Missing referenced file: $file"
+              echo "❌ Missing referenced workflow: $file"
               exit 1
             else
-              echo "✓ Referenced file exists: $file"
+              echo "✓ Referenced workflow exists: $file"
             fi
-          fi
-        done
+          done
 
-        # Check workflow references
-        grep -o '\.github/workflows/[^)]*\.yml' README.md | while read file; do
-          if [ ! -f "$file" ]; then
-            echo "❌ Missing referenced workflow: $file"
-            exit 1
-          else
-            echo "✓ Referenced workflow exists: $file"
-          fi
-        done
-
-    - name: Markdown linting
-      run: |
-        # Install markdownlint
-        npm install -g markdownlint-cli
-        markdownlint README.md docs/*.md --ignore node_modules || true
+      - name: Markdown linting
+        run: |
+          # Install markdownlint
+          npm install -g markdownlint-cli
+          markdownlint README.md docs/*.md --ignore node_modules || true
 
   security:
     name: Security Scan
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: 3.11
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
 
-    - name: Install security tools
-      run: |
-        pip install safety bandit semgrep
+      - name: Install security tools
+        run: |
+          pip install safety bandit semgrep
 
-    - name: Check for known vulnerabilities in dependencies
-      run: |
-        safety check -r requirements.txt -r tests/requirements-test.txt
+      - name: Check for known vulnerabilities in dependencies
+        run: |
+          safety check -r requirements.txt \
+            -r tests/requirements-test.txt
 
-    - name: Run Bandit security scan
-      run: |
-        bandit -r src/ -f json -o bandit-results.json
+      - name: Run Bandit security scan
+        run: |
+          bandit -r src/ -f json -o bandit-results.json
 
-    - name: Run Semgrep security scan
-      run: |
-        semgrep --config=auto src/ || true
+      - name: Run Semgrep security scan
+        run: |
+          semgrep --config=auto src/ || true
 
-    - name: Upload security scan results
-      uses: actions/upload-artifact@v3
-      if: always()
-      with:
-        name: security-scan-results
-        path: bandit-results.json
+      - name: Upload security scan results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: security-scan-results
+          path: bandit-results.json
 
   test-examples:
     name: Test Example Workflows
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: 3.11
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
 
-    - name: Install dependencies
-      run: |
-        pip install -r requirements.txt
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
 
-    - name: Test with example config (dry run)
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        CONFIG_FILE: configs/example-template.json
-      run: |
-        # Test that the monitor can load the example config without errors
-        timeout 30s python src/monitor_github_notify.py || true
-        echo "Example config test completed"
+      - name: Test with example config (dry run)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CONFIG_FILE: configs/example-template.json
+        run: |
+          # Test that the monitor can load the example config without errors
+          timeout 30s python src/monitor_github_notify.py || true
+          echo "Example config test completed"
 
-    - name: Validate workflow syntax
-      run: |
-        # Use act to validate GitHub Actions workflow syntax
-        # Install act if available or use alternative validation
-        curl -s https://api.github.com/repos/nektos/act/releases/latest | \
-          grep "browser_download_url.*linux_amd64" | \
-          cut -d '"' -f 4 | \
-          head -n 1 | \
-          xargs curl -L -o act.tar.gz
-        tar xzf act.tar.gz
-        chmod +x act
-        ./act -n --workflows .github/workflows/keyword-example.yml || true
+      - name: Validate workflow syntax
+        run: |
+          # Use act to validate GitHub Actions workflow syntax
+          # Install act if available or use alternative validation
+          curl -s https://api.github.com/repos/nektos/act/releases/latest | \
+            grep "browser_download_url.*linux_amd64" | \
+            cut -d '"' -f 4 | head -n 1 | \
+            xargs curl -L -o act.tar.gz
+          tar xzf act.tar.gz
+          chmod +x act
+          ./act -n --workflows .github/workflows/keyword-example.yml || \
+            true
 
   notify:
     name: Notify Results
     runs-on: ubuntu-latest
-    needs: [test, config-validation, documentation, security, test-examples]
+    needs:
+      - test
+      - config-validation
+      - documentation
+      - security
+      - test-examples
     if: always()
 
     steps:
-    - name: Report Status
-      run: |
-        echo "CI Pipeline Results:"
-        echo "Test: ${{ needs.test.result }}"
-        echo "Config Validation: ${{ needs.config-validation.result }}"
-        echo "Documentation: ${{ needs.documentation.result }}"
-        echo "Security: ${{ needs.security.result }}"
-        echo "Example Tests: ${{ needs.test-examples.result }}"
+      - name: Report Status
+        run: |
+          echo "CI Pipeline Results:"
+          echo "Test: ${{ needs.test.result }}"
+          echo "Config Validation: ${{ needs.config-validation.result }}"
+          echo "Documentation: ${{ needs.documentation.result }}"
+          echo "Security: ${{ needs.security.result }}"
+          echo "Example Tests: ${{ needs.test-examples.result }}"
 
-        if [[ "${{ needs.test.result }}" == "failure" || \
-              "${{ needs.config-validation.result }}" == "failure" || \
-              "${{ needs.documentation.result }}" == "failure" ]]; then
-          echo "❌ CI Pipeline failed"
-          exit 1
-        else
-          echo "✅ CI Pipeline passed"
-        fi
+          if [[ "${{ needs.test.result }}" == "failure" || \
+                "${{ needs.config-validation.result }}" == "failure" || \
+                "${{ needs.documentation.result }}" == "failure" ]]; then
+            echo "❌ CI Pipeline failed"
+            exit 1
+          else
+            echo "✅ CI Pipeline passed"
+          fi
