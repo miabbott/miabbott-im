@@ -23,16 +23,19 @@ Simply ensure your repository has:
 - Issues enabled (Settings → Features → Issues)
 - `GITHUB_TOKEN` secret (usually auto-provided by GitHub Actions)
 
-### 2. Create Configuration
+### 2. Create Your First Monitor
 
-Copy `configs/example-template.json` and customize:
+Copy `configs/example-template.json` to create your own monitor (e.g., `configs/my-monitor.json`):
 
 ```json
 {
-  "name": "my-monitor",
+  "name": "my-security-monitor",
+  "description": "Monitor for security-related issues",
+  "enabled": true,
   "searchPhrases": [
     "security vulnerability",
-    "critical bug"
+    "critical bug",
+    "CVE-"
   ],
   "excludedRepos": [
     "spam-owner/test-repo"
@@ -53,9 +56,13 @@ Copy `configs/example-template.json` and customize:
 }
 ```
 
-### 3. Use the GitHub Issues Workflow
+### 3. Automatic Workflow Execution
 
-Use `.github/workflows/keyword-example.yml` which creates GitHub issues for notifications.
+The universal GitHub Actions workflow (`.github/workflows/monitors.yml`) automatically:
+- **Discovers** all JSON config files in `configs/` directory
+- **Runs** each enabled monitor in parallel
+- **Creates** GitHub issues with findings from each monitor
+- **Schedules** execution every 2 hours (or run manually)
 
 ## How It Works
 
@@ -69,9 +76,14 @@ Use `.github/workflows/keyword-example.yml` which creates GitHub issues for noti
 When new issues are found, a GitHub issue is created like:
 
 ```markdown
-# 🔍 3 new issues found - 2024-01-15
+# 🔍 [security-monitor] 3 new issues found - 2024-01-15
 
 Found 3 new GitHub issues matching keywords:
+
+**Monitor:** `security-monitor`
+**Config:** `configs/security-monitor.json`
+
+---
 
 ## 📋 [Critical security vulnerability in authentication](https://github.com/owner/repo/issues/123)
 
@@ -94,8 +106,13 @@ Found 3 new GitHub issues matching keywords:
 
 ---
 
-*This issue was automatically created by the GitHub issue monitor on 2024-01-15*
+*This issue was automatically created by the GitHub issue monitor (`security-monitor`) on 2024-01-15*
 ```
+
+**Enhanced Features:**
+- Monitor name in title and labels for easy identification
+- Config file reference for traceability
+- Unique labels per monitor: `monitor-security-monitor`, `github-monitor`, etc.
 
 ## Getting Notifications
 
@@ -110,7 +127,10 @@ You'll automatically get GitHub notifications for new issues created in your rep
 
 | Field | Description | Example |
 |-------|-------------|---------|
-| `name` | Unique identifier for this monitor | `"my-monitor"` |
+| `name` | Unique identifier for this monitor | `"security-monitor"` |
+| `description` | Human-readable description | `"Monitor for security issues"` |
+| `enabled` | Whether this monitor is active | `true` |
+| `version` | Config version for tracking changes | `"1.0"` |
 | `searchPhrases` | Array of phrases to search for | `["security vulnerability", "critical bug"]` |
 | `excludedRepos` | Repositories to ignore | `["owner/repo"]` |
 | `excludedOrgs` | Organizations to ignore | `["spam-org"]` |
@@ -118,16 +138,35 @@ You'll automatically get GitHub notifications for new issues created in your rep
 | `notifications.githubIssues.enabled` | Enable GitHub issue creation | `true` |
 | `notifications.slack.enabled` | Enable Slack notifications | `false` |
 | `notifications.slack.channel` | Slack channel for notifications | `"#alerts"` |
+| `metadata.tags` | Tags for organization | `["security", "high-priority"]` |
 
 **For Slack setup**, see the [detailed Slack integration guide](docs/slack-setup.md).
 
 ## Multiple Monitors
 
-You can create multiple monitoring workflows:
+Creating multiple monitors is simple - just add more JSON config files:
 
-1. Create separate config files: `configs/security.json`, `configs/bugs.json`
-2. Create separate workflow files: `.github/workflows/security-monitor-github.yml`
-3. Each monitor creates issues with different labels for easy filtering
+```bash
+configs/
+├── security-monitor.json          # Security vulnerabilities
+├── bug-monitor.json              # Critical bugs
+├── feature-request-monitor.json  # Feature requests
+└── example-template.json         # Template (ignored by workflow)
+```
+
+**Key Benefits:**
+- ✅ **No separate workflow files needed** - one workflow runs them all
+- ✅ **Automatic discovery** - new configs are detected automatically
+- ✅ **Parallel execution** - monitors run simultaneously for faster results
+- ✅ **Individual control** - enable/disable monitors with the `enabled` field
+- ✅ **Unique labeling** - each monitor gets its own GitHub issue labels
+
+**Example monitors:**
+- **Security**: `configs/security-monitor.json` - CVEs, vulnerabilities
+- **Bugs**: `configs/bug-monitor.json` - critical bugs, crashes
+- **Features**: `configs/feature-requests.json` - enhancement requests
+
+Each monitor creates GitHub issues with distinct labels like `monitor-security-monitor` for easy filtering.
 
 ## Testing
 
@@ -136,13 +175,26 @@ Test your configuration manually:
 ```bash
 # Set environment variables
 export GITHUB_TOKEN="your_token"
-export CONFIG_FILE="configs/example-template.json"
+export CONFIG_FILE="configs/your-monitor.json"  # Point to your config
 
 # Install dependencies
 pip install -r requirements.txt
 
 # Run monitor (creates new_issues.json if issues found)
 python src/monitor_github_notify.py
+```
+
+**Test the full workflow locally:**
+```bash
+# Test workflow config discovery
+find configs/ -name "*.json" -not -name "*template*" -not -name "*example*"
+
+# Test individual monitor
+export CONFIG_FILE="configs/security-monitor.json"
+python src/monitor_github_notify.py
+
+# Run with manual trigger (GitHub CLI required)
+gh workflow run monitors.yml
 ```
 
 
