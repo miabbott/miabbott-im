@@ -103,10 +103,9 @@ jobs:
             const newIssues = JSON.parse(
               fs.readFileSync('new_issues.json', 'utf8'));
             const today = new Date().toISOString().split('T')[0];
-            const monitorName = \
-              '${{ steps.monitor-info.outputs.monitor_name }}';
-            const configFile = \
-              '${{ steps.monitor-info.outputs.config_file }}';
+            const configFile = '${{ matrix.config }}';
+            const configData = JSON.parse(fs.readFileSync(configFile, 'utf8'));
+            const monitorName = configData.name;
 
             let body = `Found ${newIssues.length} new GitHub issue${
               newIssues.length > 1 ? 's' : ''} matching keywords:\n\n`;
@@ -157,7 +156,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: monitor-results-${{ steps.monitor-info.outputs.monitor_name }}
+          name: monitor-results-${{ matrix.config }}
           path: |
             new_issues.json
             *.log
