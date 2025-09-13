@@ -35,7 +35,7 @@ This guide shows how to set up Slack notifications for your GitHub issue monitor
 
 ## Step 2: Configure Your Monitor
 
-Edit your config file (e.g., `configs/example-template.json`):
+Edit your config file (e.g., `configs/template.json.example`):
 
 ```json
 {
@@ -86,7 +86,7 @@ Edit your config file (e.g., `configs/example-template.json`):
 # Set environment variables
 export GITHUB_TOKEN="your_github_token"
 export SLACK_WEBHOOK_URL="your_webhook_url"
-export CONFIG_FILE="configs/example-template.json"
+export CONFIG_FILE="configs/template.json.example"
 
 # Run the monitor
 python src/monitor_github_notify.py

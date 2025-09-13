@@ -118,7 +118,7 @@ fi
 
 # Test the example configuration
 print_status "Testing example configuration..."
-export CONFIG_FILE="configs/example-template.json"
+export CONFIG_FILE="configs/template.json.example"
 if timeout 10s python src/monitor_github_notify.py 2>/dev/null || [ $? -eq 124 ]; then
     print_success "Example configuration loads successfully"
 else

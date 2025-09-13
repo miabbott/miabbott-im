@@ -253,7 +253,7 @@ class GitHubIssueMonitor:
 
 def main():
     """Main entry point."""
-    config_file = os.getenv("CONFIG_FILE", "configs/example-template.json")
+    config_file = os.getenv("CONFIG_FILE", "configs/template.json.example")
 
     try:
         with open(config_file, "r") as f:

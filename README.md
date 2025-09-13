@@ -25,7 +25,7 @@ Simply ensure your repository has:
 
 ### 2. Create Your First Monitor
 
-Copy `configs/example-template.json` to create your own monitor (e.g., `configs/my-monitor.json`):
+Copy `configs/template.json.example` to create your own monitor (e.g., `configs/my-monitor.json`):
 
 ```json
 {
@@ -151,7 +151,7 @@ configs/
 ├── security-monitor.json          # Security vulnerabilities
 ├── bug-monitor.json              # Critical bugs
 ├── feature-request-monitor.json  # Feature requests
-└── example-template.json         # Template (ignored by workflow)
+└── template.json.example         # Template (ignored by workflow)
 ```
 
 **Key Benefits:**

@@ -121,14 +121,19 @@ jobs:
           echo "Checking README.md references..."
 
           # Extract file references from README.md and check they exist
-          grep -o 'configs/[^`,)]*\.json' README.md | \
+          grep -o 'configs/[^`,)]*\.json[^`,)\s]*' README.md | \
             sed 's/`//g' | \
             while read file; do
             if [[ "$file" == *"example"* ]] || \
                [[ "$file" == *"template"* ]] || \
+               [[ "$file" == "template.json.example" ]] || \
                [[ "$file" == "configs/security.json" ]] || \
                [[ "$file" == "configs/bugs.json" ]] || \
-               [[ "$file" == "configs/my-monitor.json" ]]; then
+               [[ "$file" == "configs/my-monitor.json" ]] || \
+               [[ "$file" == "configs/security-monitor.json" ]] || \
+               [[ "$file" == "configs/bug-monitor.json" ]] || \
+               [[ "$file" == "configs/feature-requests.json" ]] || \
+               [[ "$file" == "configs/your-monitor.json" ]]; then
               if [ ! -f "$file" ]; then
                 echo "✓ Example file reference (expected): $file"
               else
