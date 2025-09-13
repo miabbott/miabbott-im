@@ -1,0 +1,18 @@
+{
+  "name": "FDO",
+  "searchPhrases": [
+    "FDO",
+    "FIDO Device Onboard"
+  ],
+  "excludedRepos": [],
+  "excludedOrgs": [
+    "fedora-iot",
+    "fido-device-onboard"
+  ],
+  "lookbackHours": 24,
+  "notifications": {
+    "githubIssues": {
+      "enabled": true
+    }
+  }
+}
