@@ -200,8 +200,8 @@ jobs:
           name: security-scan-results
           path: bandit-results.json
 
-  test-examples:
-    name: Test Example Workflows
+  test-monitors-workflow:
+    name: Test Monitor Architecture
     runs-on: ubuntu-latest
 
     steps:
@@ -217,6 +217,22 @@ jobs:
         run: |
           pip install -r requirements.txt
 
+      - name: Test config discovery mechanism
+        run: |
+          # Test that the discovery mechanism works as expected
+          echo "Testing config file discovery..."
+          configs=$(find configs/ -name "*.json" -not -name "*template*" \
+            -not -name "*example*" | wc -l)
+          echo "Found $configs config files for monitoring"
+          
+          # Test example configs can be loaded
+          for file in configs/*.example; do
+            if [ -f "$file" ]; then
+              echo "Validating example config: $file"
+              python -m json.tool "$file" > /dev/null
+            fi
+          done
+
       - name: Test with example config (dry run)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -226,10 +242,17 @@ jobs:
           timeout 30s python src/monitor_github_notify.py || true
           echo "Example config test completed"
 
-      - name: Validate workflow syntax
+      - name: Validate monitors workflow syntax
+        run: |
+          # Validate the universal monitors workflow specifically
+          pip install yamllint
+          echo "Validating monitors.yml workflow syntax..."
+          yamllint .github/workflows/monitors.yml
+          echo "✅ Monitors workflow validation completed"
+
+      - name: Validate all workflow syntax
         run: |
           # Validate all GitHub Actions workflow syntax with yamllint
-          pip install yamllint
           echo "Validating all workflow YAML syntax..."
           yamllint .github/workflows/
           echo "✅ All workflow syntax validation completed"
@@ -242,7 +265,7 @@ jobs:
       - config-validation
       - documentation
       - security
-      - test-examples
+      - test-monitors-workflow
     if: always()
 
     steps:
@@ -253,7 +276,7 @@ jobs:
           echo "Config Validation: ${{ needs.config-validation.result }}"
           echo "Documentation: ${{ needs.documentation.result }}"
           echo "Security: ${{ needs.security.result }}"
-          echo "Example Tests: ${{ needs.test-examples.result }}"
+          echo "Monitor Architecture Tests: ${{ needs.test-monitors-workflow.result }}"
 
           if [[ "${{ needs.test.result }}" == "failure" || \
                 "${{ needs.config-validation.result }}" == "failure" || \
