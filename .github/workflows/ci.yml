@@ -159,9 +159,9 @@ jobs:
 
       - name: Markdown linting
         run: |
-          # Install markdownlint
-          npm install -g markdownlint-cli
-          markdownlint README.md docs/*.md --ignore node_modules || true
+          # Install PyMarkdown (Python-based markdown linter)
+          pip install pymarkdownlnt
+          pymarkdown scan README.md docs/ tests/ || true
 
   security:
     name: Security Scan
