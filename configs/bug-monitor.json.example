@@ -1,0 +1,42 @@
+{
+  "name": "bug-monitor",
+  "description": "Monitor for critical bugs and performance issues",
+  "version": "1.0",
+  "enabled": true,
+  "searchPhrases": [
+    "critical bug",
+    "production down",
+    "performance issue",
+    "memory leak",
+    "crash",
+    "exception",
+    "error handling",
+    "regression",
+    "data corruption",
+    "timeout"
+  ],
+  "excludedRepos": [
+    "archive/old-project"
+  ],
+  "excludedOrgs": [
+    "deprecated-org"
+  ],
+  "lookbackHours": 12,
+  "notifications": {
+    "githubIssues": {
+      "enabled": true
+    },
+    "slack": {
+      "enabled": true,
+      "webhookUrl": "https://hooks.slack.com/services/YOUR/WEBHOOK/URL",
+      "channel": "#bug-reports",
+      "username": "Bug Monitor",
+      "iconEmoji": ":bug:"
+    }
+  },
+  "metadata": {
+    "created": "2025-01-13T00:00:00Z",
+    "author": "dev-team@example.com",
+    "tags": ["bugs", "critical", "production"]
+  }
+}

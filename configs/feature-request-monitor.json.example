@@ -1,0 +1,40 @@
+{
+  "name": "feature-request-monitor",
+  "description": "Monitor for feature requests and enhancement suggestions",
+  "version": "1.0",
+  "enabled": false,
+  "searchPhrases": [
+    "feature request",
+    "enhancement",
+    "improvement",
+    "new feature",
+    "would be nice",
+    "suggestion",
+    "user experience",
+    "usability",
+    "feature proposal",
+    "roadmap"
+  ],
+  "excludedRepos": [
+    "internal/private-repo"
+  ],
+  "excludedOrgs": [],
+  "lookbackHours": 48,
+  "notifications": {
+    "githubIssues": {
+      "enabled": true
+    },
+    "slack": {
+      "enabled": false,
+      "webhookUrl": "",
+      "channel": "#feature-requests",
+      "username": "Feature Monitor",
+      "iconEmoji": ":bulb:"
+    }
+  },
+  "metadata": {
+    "created": "2025-01-13T00:00:00Z",
+    "author": "product-team@example.com",
+    "tags": ["features", "enhancement", "low-priority"]
+  }
+}

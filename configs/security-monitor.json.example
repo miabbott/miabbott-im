@@ -1,0 +1,43 @@
+{
+  "name": "security-monitor",
+  "description": "Monitor for security-related issues and vulnerabilities",
+  "version": "1.0",
+  "enabled": true,
+  "searchPhrases": [
+    "security vulnerability",
+    "CVE-",
+    "XSS",
+    "SQL injection",
+    "remote code execution",
+    "privilege escalation",
+    "buffer overflow",
+    "authentication bypass",
+    "information disclosure",
+    "denial of service"
+  ],
+  "excludedRepos": [
+    "example/test-repo",
+    "sandbox/demo"
+  ],
+  "excludedOrgs": [
+    "test-organization"
+  ],
+  "lookbackHours": 6,
+  "notifications": {
+    "githubIssues": {
+      "enabled": true
+    },
+    "slack": {
+      "enabled": true,
+      "webhookUrl": "https://hooks.slack.com/services/YOUR/WEBHOOK/URL",
+      "channel": "#security-alerts",
+      "username": "Security Monitor",
+      "iconEmoji": ":shield:"
+    }
+  },
+  "metadata": {
+    "created": "2025-01-13T00:00:00Z",
+    "author": "security-team@example.com",
+    "tags": ["security", "vulnerability", "high-priority"]
+  }
+}
