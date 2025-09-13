@@ -7,13 +7,14 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 import requests
-from github import Github
+from github import Github, Auth
 
 
 class GitHubIssueMonitor:
     def __init__(self, config: Dict[str, Any]):
         self.config = config
-        self.github = Github(os.getenv("GITHUB_TOKEN"))
+        auth = Auth.Token(os.getenv("GITHUB_TOKEN"))
+        self.github = Github(auth=auth)
         self.cache_file = Path(f"cache/{config['name']}-cache.json")
 
     def load_cache(self) -> Dict[str, Any]:
