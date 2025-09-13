@@ -68,20 +68,27 @@ jobs:
             "${{ matrix.config }}")
           monitor_desc=$(jq -r '.description // ""' "${{ matrix.config }}")
 
+          # Create safe artifact name from config file path
+          config_basename=$(basename "${{ matrix.config }}" .json.example)
+          safe_artifact_name=$(echo "$config_basename" | \
+            sed 's/[^a-zA-Z0-9._-]/-/g')
+
           echo "monitor_name=$monitor_name" >> $GITHUB_OUTPUT
           echo "monitor_desc=$monitor_desc" >> $GITHUB_OUTPUT
           echo "config_file=${{ matrix.config }}" >> $GITHUB_OUTPUT
+          echo "artifact_name=$safe_artifact_name" >> $GITHUB_OUTPUT
 
           echo "Processing monitor: $monitor_name"
           if [ -n "$monitor_desc" ]; then
             echo "Description: $monitor_desc"
           fi
+          echo "Safe artifact name: $safe_artifact_name"
 
       - name: Download previous findings
         continue-on-error: true
         uses: actions/download-artifact@v4
         with:
-          name: monitor-results-${{ matrix.config }}
+          name: monitor-results-${{ steps.monitor-info.outputs.artifact_name }}
           path: ./previous-run
 
       - name: Run Issue Monitor
@@ -162,7 +169,7 @@ jobs:
             const today = new Date().toISOString().split('T')[0];
             const configFile = '${{ matrix.config }}';
             const configData = JSON.parse(fs.readFileSync(configFile, 'utf8'));
-            const monitorName = configData.name;
+            const monitorName = configData.name || 'unnamed-monitor';
 
             let body = `Found ${trulyNewIssues.length} new GitHub issue${
               trulyNewIssues.length > 1 ? 's' : ''} matching keywords:\n\n`;
@@ -201,7 +208,7 @@ jobs:
                 'github-monitor',
                 'notification',
                 'auto-created',
-                `monitor-${monitorName.toLowerCase()` +
+                `monitor-${String(monitorName).toLowerCase()` +
                   `.replace(/[^a-z0-9]/g, '-')}`
               ]
             });
@@ -247,7 +254,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: monitor-results-${{ matrix.config }}
+          name: monitor-results-${{ steps.monitor-info.outputs.artifact_name }}
           path: processed_issues.json
           retention-days: 30
           if-no-files-found: ignore

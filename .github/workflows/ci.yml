@@ -253,6 +253,95 @@ jobs:
           yamllint .github/workflows/
           echo "✅ All workflow syntax validation completed"
 
+      - name: Validate GitHub Actions best practices
+        run: |
+          echo "🔍 Checking GitHub Actions best practices..."
+
+          # Check for invalid characters in artifact names
+          echo "Checking artifact names for invalid characters..."
+          if grep -r "name:.*/" .github/workflows/ || \
+             grep -r 'name:.*\\' .github/workflows/ || \
+             grep -r 'name:.*"' .github/workflows/ || \
+             grep -r 'name:.*<' .github/workflows/ || \
+             grep -r 'name:.*>' .github/workflows/ || \
+             grep -r 'name:.*|' .github/workflows/ || \
+             grep -r 'name:.*\*' .github/workflows/ || \
+             grep -r 'name:.*?' .github/workflows/; then
+            echo "❌ Found artifact names with invalid characters"
+            echo "Artifact names cannot contain: / \\ \" < > | * ?"
+            echo "Use safe alternatives like dashes or underscores"
+            exit 1
+          fi
+
+          # Check for direct matrix.config usage in artifact names
+          echo "Checking for unsafe matrix variable usage in artifacts..."
+          if grep -r "name:.*matrix\.config" .github/workflows/; then
+            echo "❌ Found direct matrix.config usage in artifact names"
+            echo "matrix.config often contains paths with forward slashes"
+            echo "Use a safe transformation like" \
+              "\${{ steps.*.outputs.artifact_name }}"
+            exit 1
+          fi
+
+          # Validate JavaScript syntax in workflows
+          echo "Validating JavaScript code blocks in workflows..."
+          # Extract JavaScript blocks and validate basic syntax
+          for file in .github/workflows/*.yml; do
+            if grep -q "script:" "$file"; then
+              echo "Checking JavaScript syntax in $file..."
+              # Extract script blocks and check for common syntax errors
+              if grep -A 20 "script:" "$file" | grep -q "\.toLowerCase()" && \
+                 ! grep -B 10 -A 10 "\.toLowerCase()" "$file" | \
+                   grep -q "String("; then
+                # This is a simplified check - a real syntax validator
+                # would be better
+                echo "⚠️  Warning: Found .toLowerCase() usage without" \
+                  "String() wrapper in $file"
+                echo "Consider wrapping variables in String() to" \
+                  "prevent TypeError"
+              fi
+            fi
+          done
+
+          echo "✅ GitHub Actions best practices validation completed"
+
+      - name: Test artifact name generation
+        run: |
+          echo "🧪 Testing artifact name generation logic..."
+
+          # Simulate the artifact name generation for various config paths
+          test_configs=(
+            "configs/simple.json"
+            "configs/test-monitor.json"
+            "configs/security-monitor.json.example"
+            "configs/with_underscores.json"
+            "configs/with-special!@#chars.json"
+          )
+
+          for config in "${test_configs[@]}"; do
+            # Simulate the basename + sed transformation
+            config_basename=$(basename "$config" .json.example)
+            config_basename=$(basename "$config_basename" .json)
+            safe_name=$(echo "$config_basename" | \
+              sed 's/[^a-zA-Z0-9._-]/-/g')
+
+            echo "Config: $config -> Safe name: $safe_name"
+
+            # Validate the generated name follows artifact naming rules
+            if [[ "$safe_name" =~ [/\\\"<>\|\*\?] ]]; then
+              echo "❌ Generated unsafe artifact name: $safe_name"
+              exit 1
+            fi
+
+            # Ensure it's not empty or just special chars
+            if [[ -z "$safe_name" ]] || [[ "$safe_name" =~ ^[-._]+$ ]]; then
+              echo "❌ Generated empty or invalid artifact name: $safe_name"
+              exit 1
+            fi
+          done
+
+          echo "✅ Artifact name generation test completed"
+
   notify:
     name: Notify Results
     runs-on: ubuntu-latest
