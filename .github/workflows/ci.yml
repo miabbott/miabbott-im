@@ -1,7 +1,7 @@
 ---
 name: CI Pipeline
 
-on:
+"on":
   push:
     branches: [main, develop]
   pull_request:
@@ -224,7 +224,6 @@ jobs:
           configs=$(find configs/ -name "*.json" -not -name "*template*" \
             -not -name "*example*" | wc -l)
           echo "Found $configs config files for monitoring"
-          
           # Test example configs can be loaded
           for file in configs/*.example; do
             if [ -f "$file" ]; then
@@ -276,7 +275,8 @@ jobs:
           echo "Config Validation: ${{ needs.config-validation.result }}"
           echo "Documentation: ${{ needs.documentation.result }}"
           echo "Security: ${{ needs.security.result }}"
-          echo "Monitor Architecture Tests: ${{ needs.test-monitors-workflow.result }}"
+          echo "Monitor Architecture Tests: \
+            ${{ needs.test-monitors-workflow.result }}"
 
           if [[ "${{ needs.test.result }}" == "failure" || \
                 "${{ needs.config-validation.result }}" == "failure" || \

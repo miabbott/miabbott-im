@@ -1,7 +1,7 @@
 ---
 name: GitHub Issue Monitors
 
-on:
+"on":
   schedule:
     # Run every 2 hours
     - cron: '0 */2 * * *'
@@ -103,8 +103,10 @@ jobs:
             const newIssues = JSON.parse(
               fs.readFileSync('new_issues.json', 'utf8'));
             const today = new Date().toISOString().split('T')[0];
-            const monitorName = '${{ steps.monitor-info.outputs.monitor_name }}';
-            const configFile = '${{ steps.monitor-info.outputs.config_file }}';
+            const monitorName = \
+              '${{ steps.monitor-info.outputs.monitor_name }}';
+            const configFile = \
+              '${{ steps.monitor-info.outputs.config_file }}';
 
             let body = `Found ${newIssues.length} new GitHub issue${
               newIssues.length > 1 ? 's' : ''} matching keywords:\n\n`;
@@ -143,7 +145,8 @@ jobs:
                 'github-monitor',
                 'notification',
                 'auto-created',
-                `monitor-${monitorName.toLowerCase().replace(/[^a-z0-9]/g, '-')}`
+                `monitor-${monitorName.toLowerCase()` +
+                  `.replace(/[^a-z0-9]/g, '-')}`
               ]
             });
 
