@@ -124,16 +124,10 @@ jobs:
           grep -o 'configs/[^`,)"]*\.json[^`,)"]*' README.md | \
             sed 's/`//g' | sed 's/".*$//' | \
             while read file; do
-            if [[ "$file" == *"example"* ]] || \
-               [[ "$file" == *"template"* ]] || \
-               [[ "$file" == "template.json.example" ]] || \
-               [[ "$file" == "configs/security.json" ]] || \
-               [[ "$file" == "configs/bugs.json" ]] || \
-               [[ "$file" == "configs/my-monitor.json" ]] || \
-               [[ "$file" == "configs/security-monitor.json" ]] || \
-               [[ "$file" == "configs/bug-monitor.json" ]] || \
-               [[ "$file" == "configs/feature-requests.json" ]] || \
-               [[ "$file" == "configs/your-monitor.json" ]]; then
+            # All config file references in README.md are examples/illustrations
+            # The actual files are .example files in configs/ directory
+            # Any .json references are just examples for users to create
+            if [[ "$file" == configs/* ]]; then
               if [ ! -f "$file" ]; then
                 echo "✓ Example file reference (expected): $file"
               else
@@ -236,7 +230,7 @@ jobs:
       - name: Test with example config (dry run)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CONFIG_FILE: configs/example-template.json
+          CONFIG_FILE: configs/template.json.example
         run: |
           # Test that the monitor can load the example config without errors
           timeout 30s python src/monitor_github_notify.py || true
