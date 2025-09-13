@@ -95,9 +95,10 @@ python src/monitor_github_notify.py
 ### Workflow Test
 
 1. Go to **Actions** tab in your repository
-2. Select your monitor workflow
+2. Select the **"GitHub Issue Monitors"** workflow
 3. Click **"Run workflow"** to trigger manually
-4. Check your Slack channel for notifications
+4. Optionally filter by monitor name using the config filter input
+5. Check your Slack channel for notifications
 
 ## Notification Format
 
