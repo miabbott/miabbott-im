@@ -69,7 +69,9 @@ jobs:
           monitor_desc=$(jq -r '.description // ""' "${{ matrix.config }}")
 
           # Create safe artifact name from config file path
-          config_basename=$(basename "${{ matrix.config }}" .json.example)
+          config_basename=$(basename "${{ matrix.config }}")
+          config_basename=$(basename "$config_basename" .json.example)
+          config_basename=$(basename "$config_basename" .json)
           safe_artifact_name=$(echo "$config_basename" | \
             sed 's/[^a-zA-Z0-9._-]/-/g')
 
@@ -208,8 +210,8 @@ jobs:
                 'github-monitor',
                 'notification',
                 'auto-created',
-                `monitor-${String(monitorName).toLowerCase()` +
-                  `.replace(/[^a-z0-9]/g, '-')}`
+                `monitor-${String(monitorName).toLowerCase()
+                  .replace(/[^a-z0-9]/g, '-')}`
               ]
             });
 
