@@ -1,5 +1,8 @@
 {
   "name": "fedora-iot",
+  "description": "Monitor for Fedora IoT related issues and discussions",
+  "version": "1.0",
+  "enabled": true,
   "searchPhrases": [
     "Fedora IoT"
   ],
@@ -11,6 +14,18 @@
   "notifications": {
     "githubIssues": {
       "enabled": true
+    },
+    "slack": {
+      "enabled": true,
+      "webhookUrl": "",
+      "channel": "#fedora-iot-updates",
+      "username": "Fedora IoT Monitor",
+      "iconEmoji": ":computer:"
     }
+  },
+  "metadata": {
+    "created": "2025-09-13T00:00:00Z",
+    "author": "miabbott@fedoraproject.org",
+    "tags": ["fedora-iot", "fedora", "iot", "edge"]
   }
 }

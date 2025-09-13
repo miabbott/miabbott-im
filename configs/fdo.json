@@ -1,5 +1,8 @@
 {
   "name": "FDO",
+  "description": "Monitor for FIDO Device Onboarding (FDO) related issues and discussions",
+  "version": "1.0",
+  "enabled": true,
   "searchPhrases": [
     "FDO",
     "FIDO Device Onboard"
@@ -13,6 +16,18 @@
   "notifications": {
     "githubIssues": {
       "enabled": true
+    },
+    "slack": {
+      "enabled": true,
+      "webhookUrl": "",
+      "channel": "#fdo-updates",
+      "username": "FDO Monitor",
+      "iconEmoji": ":key:"
     }
+  },
+  "metadata": {
+    "created": "2025-09-13T00:00:00Z",
+    "author": "miabbott@fedoraproject.org",
+    "tags": ["FDO", "FIDO", "device-onboarding", "security"]
   }
 }
