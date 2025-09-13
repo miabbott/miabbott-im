@@ -39,12 +39,16 @@ class GitHubIssueMonitor:
     def build_search_query(self) -> str:
         """Build GitHub search query from configuration."""
         # Combine search phrases with OR
-        phrases = " OR ".join(f'"{phrase}"' for phrase in self.config["searchPhrases"])
+        phrases = " OR ".join(
+            f'"{phrase}"' for phrase in self.config["searchPhrases"]
+        )
         query = f"({phrases}) type:issue"
 
         # Add time filter for recent issues
         hours_ago = self.config.get("lookbackHours", 24)
-        date = (datetime.now() - timedelta(hours=hours_ago)).strftime("%Y-%m-%d")
+        date = (datetime.now() - timedelta(hours=hours_ago)).strftime(
+            "%Y-%m-%d"
+        )
         query += f" created:>={date}"
 
         # Exclude repositories
@@ -66,12 +70,17 @@ class GitHubIssueMonitor:
 
         try:
             # Use GitHub Search API
-            issues = self.github.search_issues(query, sort="created", order="desc")
+            issues = self.github.search_issues(
+                query, sort="created", order="desc"
+            )
 
             # Convert to dict format and filter out PRs
             results = []
             for issue in issues:
-                if not hasattr(issue, "pull_request") or issue.pull_request is None:
+                if (
+                    not hasattr(issue, "pull_request")
+                    or issue.pull_request is None
+                ):
                     results.append(
                         {
                             "id": issue.id,
@@ -110,14 +119,18 @@ class GitHubIssueMonitor:
         if not slack_config.get("enabled", False):
             return
 
-        webhook_url = slack_config.get("webhookUrl") or os.getenv("SLACK_WEBHOOK_URL")
+        webhook_url = slack_config.get("webhookUrl") or os.getenv(
+            "SLACK_WEBHOOK_URL"
+        )
         if not webhook_url:
             print("⚠️  Slack enabled but no webhook URL configured")
             return
 
         # Build Slack message
         count = len(issues)
-        phrases = ", ".join(f'"{phrase}"' for phrase in self.config["searchPhrases"])
+        phrases = ", ".join(
+            f'"{phrase}"' for phrase in self.config["searchPhrases"]
+        )
 
         # Create rich Slack message with blocks
         blocks = [
@@ -143,10 +156,13 @@ class GitHubIssueMonitor:
         # Add each issue as a block (limit to 10 for Slack limits)
         for issue in issues[:10]:
             repo_link = (
-                f"<https://github.com/{issue['repository']}|{issue['repository']}>"
+                f"<https://github.com/{issue['repository']}"
+                f"|{issue['repository']}>"
             )
             issue_link = f"<{issue['html_url']}|{issue['title']}>"
-            author_link = f"<https://github.com/{issue['user']}|@{issue['user']}>"
+            author_link = (
+                f"<https://github.com/{issue['user']}|@{issue['user']}>"
+            )
             created_date = datetime.fromisoformat(
                 issue["created_at"].replace("Z", "+00:00")
             ).strftime("%Y-%m-%d %H:%M UTC")
@@ -230,17 +246,20 @@ class GitHubIssueMonitor:
                 # Send notifications
                 self.send_slack_notification(new_issues)
 
-                # Save new issues for GitHub Actions to process (GitHub Issues)
-                github_issues_config = self.config.get("notifications", {}).get(
-                    "githubIssues", {}
-                )
+                # Save new issues for GitHub Actions to process
+                # (GitHub Issues)
+                github_issues_config = self.config.get(
+                    "notifications", {}
+                ).get("githubIssues", {})
                 if github_issues_config.get(
                     "enabled", True
                 ):  # Default to enabled for backward compatibility
                     self.save_new_issues(new_issues)
 
                 # Update cache
-                cache["notified_issues"].extend(issue["id"] for issue in new_issues)
+                cache["notified_issues"].extend(
+                    issue["id"] for issue in new_issues
+                )
 
                 # Keep cache size manageable
                 if len(cache["notified_issues"]) > 1000:
