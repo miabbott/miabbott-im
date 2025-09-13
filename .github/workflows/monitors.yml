@@ -248,9 +248,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: monitor-results-${{ matrix.config }}
-          path: |
-            new_issues.json
-            processed_issues.json
-            *.log
+          path: processed_issues.json
           retention-days: 30
           if-no-files-found: ignore
