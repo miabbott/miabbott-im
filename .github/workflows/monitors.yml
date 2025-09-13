@@ -77,6 +77,13 @@ jobs:
             echo "Description: $monitor_desc"
           fi
 
+      - name: Download previous findings
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: monitor-results-${{ matrix.config }}
+          path: ./previous-run
+
       - name: Run Issue Monitor
         id: monitor
         env:
@@ -100,20 +107,70 @@ jobs:
         with:
           script: |
             const fs = require('fs');
+            const path = require('path');
+
+            // Load new issues found by the monitor
             const newIssues = JSON.parse(
               fs.readFileSync('new_issues.json', 'utf8'));
+
+            // Load previously processed issues (if any)
+            let processedIssues = [];
+            const previousFile = './previous-run/processed_issues.json';
+            if (fs.existsSync(previousFile)) {
+              try {
+                processedIssues = JSON.parse(
+                  fs.readFileSync(previousFile, 'utf8'));
+                console.log(
+                  `Loaded ${processedIssues.length} previously ` +
+                  `processed issues`);
+              } catch (error) {
+                console.log(
+                  'Could not load previous processed issues:', error.message);
+              }
+            } else {
+              console.log(
+                'No previous processed issues found - ' +
+                'first run for this monitor');
+            }
+
+            // Create Set of previously processed issue URLs for fast lookup
+            const processedUrls = new Set(
+              processedIssues.map(issue => issue.html_url));
+
+            // Filter out issues that were already processed
+            const trulyNewIssues = newIssues.filter(issue => {
+              if (processedUrls.has(issue.html_url)) {
+                console.log(
+                  `Skipping duplicate issue: ${issue.title} ` +
+                  `(${issue.html_url})`);
+                return false;
+              }
+              return true;
+            });
+
+            console.log(
+              `Found ${newIssues.length} total issues, ` +
+              `${trulyNewIssues.length} are new`);
+
+            if (trulyNewIssues.length === 0) {
+              console.log(
+                'No new issues to process - ' +
+                'all were already handled in previous runs');
+              return;
+            }
+
             const today = new Date().toISOString().split('T')[0];
             const configFile = '${{ matrix.config }}';
             const configData = JSON.parse(fs.readFileSync(configFile, 'utf8'));
             const monitorName = configData.name;
 
-            let body = `Found ${newIssues.length} new GitHub issue${
-              newIssues.length > 1 ? 's' : ''} matching keywords:\n\n`;
+            let body = `Found ${trulyNewIssues.length} new GitHub issue${
+              trulyNewIssues.length > 1 ? 's' : ''} matching keywords:\n\n`;
 
             body += `**Monitor:** \`${monitorName}\`\n`;
             body += `**Config:** \`${configFile}\`\n\n---\n\n`;
 
-            for (const issue of newIssues) {
+            for (const issue of trulyNewIssues) {
               body += `## 📋 [${issue.title}](${issue.html_url})\n\n`;
               body += `- **Repository:** \`${issue.repository}\`\n`;
               body += `- **Author:** [@${issue.user}](https://github.com/${
@@ -137,8 +194,8 @@ jobs:
             await github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              title: `🔍 [${monitorName}] ${newIssues.length} new issue${
-                newIssues.length > 1 ? 's' : ''} found - ${today}`,
+              title: `🔍 [${monitorName}] ${trulyNewIssues.length} new issue${
+                trulyNewIssues.length > 1 ? 's' : ''} found - ${today}`,
               body: body,
               labels: [
                 'github-monitor',
@@ -150,7 +207,41 @@ jobs:
             });
 
             console.log(`✅ Created GitHub issue for ${
-              newIssues.length} new findings from ${monitorName}`);
+              trulyNewIssues.length} new findings from ${monitorName}`);
+
+            // Update the processed issues list for next run
+            const allProcessedIssues = [...processedIssues, ...trulyNewIssues];
+
+            // Add processing metadata
+            const processedWithMetadata = allProcessedIssues.map(issue => ({
+              ...issue,
+              processed_at: issue.processed_at || new Date().toISOString(),
+              processed_by: `${monitorName} monitor`
+            }));
+
+            // Save updated processed issues for next run
+            fs.writeFileSync('processed_issues.json',
+              JSON.stringify(processedWithMetadata, null, 2));
+
+            console.log(
+              `📝 Saved ${allProcessedIssues.length} total processed ` +
+              `issues for future duplicate prevention`);
+
+      - name: Save processed issues tracking
+        if: always()
+        run: |
+          # Ensure processed_issues.json exists even if no new issues
+          # were created
+          if [ ! -f processed_issues.json ]; then
+            if [ -f ./previous-run/processed_issues.json ]; then
+              echo "📝 No new issues - copying previous processed issues file"
+              cp ./previous-run/processed_issues.json processed_issues.json
+            else
+              echo "📝 No previous or new issues - " \
+                "creating empty processed issues file"
+              echo "[]" > processed_issues.json
+            fi
+          fi
 
       - name: Upload results as artifact
         if: always()
@@ -159,6 +250,7 @@ jobs:
           name: monitor-results-${{ matrix.config }}
           path: |
             new_issues.json
+            processed_issues.json
             *.log
           retention-days: 30
           if-no-files-found: ignore
