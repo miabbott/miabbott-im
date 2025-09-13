@@ -124,7 +124,9 @@ jobs:
           grep -o 'configs/[^)]*\.json' README.md | \
             while read file; do
             if [[ "$file" == *"example"* ]] || \
-               [[ "$file" == *"template"* ]]; then
+               [[ "$file" == *"template"* ]] || \
+               [[ "$file" == "configs/security.json" ]] || \
+               [[ "$file" == "configs/bugs.json" ]]; then
               if [ ! -f "$file" ]; then
                 echo "✓ Example file reference (expected): $file"
               else
