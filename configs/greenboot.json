@@ -1,0 +1,16 @@
+{
+  "name": "greenboot",
+  "searchPhrases": [
+    "greenboot"
+  ],
+  "excludedRepos": [],
+  "excludedOrgs": [
+    "fedora-iot"
+  ],
+  "lookbackHours": 24,
+  "notifications": {
+    "githubIssues": {
+      "enabled": true
+    }
+  }
+}

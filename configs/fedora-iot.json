@@ -1,0 +1,16 @@
+{
+  "name": "fedora-iot",
+  "searchPhrases": [
+    "Fedora IoT"
+  ],
+  "excludedRepos": [],
+  "excludedOrgs": [
+    "fedora-iot"
+  ],
+  "lookbackHours": 24,
+  "notifications": {
+    "githubIssues": {
+      "enabled": true
+    }
+  }
+}
