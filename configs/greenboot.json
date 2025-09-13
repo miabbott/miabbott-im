@@ -1,5 +1,8 @@
 {
   "name": "greenboot",
+  "description": "Monitor for greenboot-related issues and discussions",
+  "version": "1.0",
+  "enabled": true,
   "searchPhrases": [
     "greenboot"
   ],
@@ -11,6 +14,18 @@
   "notifications": {
     "githubIssues": {
       "enabled": true
+    },
+    "slack": {
+      "enabled": true,
+      "webhookUrl": "",
+      "channel": "#greenboot-updates",
+      "username": "Greenboot Monitor",
+      "iconEmoji": ":boot:"
     }
+  },
+  "metadata": {
+    "created": "2025-09-13T00:00:00Z",
+    "author": "miabbott@fedoraproject.org",
+    "tags": ["greenboot", "fedora", "ostree"]
   }
 }
