@@ -127,7 +127,8 @@ jobs:
             if [[ "$file" == *"example"* ]] || \
                [[ "$file" == *"template"* ]] || \
                [[ "$file" == "configs/security.json" ]] || \
-               [[ "$file" == "configs/bugs.json" ]]; then
+               [[ "$file" == "configs/bugs.json" ]] || \
+               [[ "$file" == "configs/my-monitor.json" ]]; then
               if [ ! -f "$file" ]; then
                 echo "✓ Example file reference (expected): $file"
               else
