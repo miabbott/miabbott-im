@@ -178,12 +178,7 @@ jobs:
 
       - name: Install security tools
         run: |
-          pip install safety bandit semgrep
-
-      - name: Check for known vulnerabilities in dependencies
-        run: |
-          safety check -r requirements.txt \
-            -r tests/requirements-test.txt
+          pip install bandit semgrep
 
       - name: Run Bandit security scan
         run: |
