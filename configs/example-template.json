@@ -1,5 +1,8 @@
 {
   "name": "my-monitor",
+  "description": "Monitor for specific keywords in GitHub issues",
+  "version": "1.0",
+  "enabled": true,
   "searchPhrases": [
     "search phrase 1",
     "another phrase",
@@ -25,5 +28,10 @@
       "username": "GitHub Monitor",
       "iconEmoji": ":mag:"
     }
+  },
+  "metadata": {
+    "created": "2025-01-13T00:00:00Z",
+    "author": "user@example.com",
+    "tags": ["example", "template"]
   }
 }
