@@ -95,13 +95,13 @@ jobs:
 
       - name: Validate JSON configs
         run: |
-      # Validate all JSON example files in configs/
-      for file in configs/*.json.example; do
-        if [ -f "$file" ]; then
-          echo "Validating $file"
-          python -m json.tool "$file" > /dev/null
-        fi
-      done
+          # Validate all JSON example files in configs/
+          for file in configs/*.json.example; do
+            if [ -f "$file" ]; then
+              echo "Validating $file"
+              python -m json.tool "$file" > /dev/null
+            fi
+          done
 
       - name: Validate workflow files
         run: |
