@@ -146,7 +146,8 @@ jobs:
           # Check workflow references
           grep -o '\.github/workflows/[^)]*\.yml' README.md | \
             while read file; do
-            if [[ "$file" == ".github/workflows/security-monitor-github.yml" ]]; then
+            if [[ "$file" == \
+                  ".github/workflows/security-monitor-github.yml" ]]; then
               echo "✓ Example workflow reference (expected): $file"
             elif [ ! -f "$file" ]; then
               echo "❌ Missing referenced workflow: $file"
