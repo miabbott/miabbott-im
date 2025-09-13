@@ -4,24 +4,20 @@
 
 import json
 import os
-import sys
 import tempfile
 from pathlib import Path
 from unittest.mock import Mock, patch
 
 import pytest
 
-# Add src to path for imports
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
-
-from monitor_github_notify import GitHubIssueMonitor, main
+from src.monitor_github_notify import GitHubIssueMonitor, main
 
 
 class TestIntegration:
     """Integration tests for the complete monitoring workflow."""
 
-    @patch("monitor_github_notify.Github")
-    @patch("monitor_github_notify.requests.post")
+    @patch("src.monitor_github_notify.Github")
+    @patch("src.monitor_github_notify.requests.post")
     def test_complete_monitoring_workflow(
         self,
         mock_post,
@@ -83,7 +79,7 @@ class TestIntegration:
         try:
             with patch.dict(
                 os.environ, {"CONFIG_FILE": config_file, "GITHUB_TOKEN": "fake_token"}
-            ), patch("monitor_github_notify.GitHubIssueMonitor.run") as mock_run:
+            ), patch("src.monitor_github_notify.GitHubIssueMonitor.run") as mock_run:
 
                 main()
                 mock_run.assert_called_once()
@@ -116,7 +112,7 @@ class TestIntegration:
         finally:
             os.unlink(config_file)
 
-    @patch("monitor_github_notify.Github")
+    @patch("src.monitor_github_notify.Github")
     def test_no_new_issues_workflow(
         self, mock_github_class, sample_config, mock_github_token
     ):
@@ -129,7 +125,7 @@ class TestIntegration:
             monitor = GitHubIssueMonitor(sample_config)
             monitor.cache_file = Path(tmpdir) / "test-cache.json"
 
-            with patch("monitor_github_notify.requests.post") as mock_post, patch(
+            with patch("src.monitor_github_notify.requests.post") as mock_post, patch(
                 "builtins.open", create=True
             ) as mock_open:
 
@@ -143,7 +139,7 @@ class TestIntegration:
                     "new_issues.json" in str(call) for call in mock_open.call_args_list
                 )
 
-    @patch("monitor_github_notify.Github")
+    @patch("src.monitor_github_notify.Github")
     def test_duplicate_issue_filtering(
         self, mock_github_class, sample_config, mock_github_token
     ):
@@ -169,12 +165,12 @@ class TestIntegration:
             monitor.cache_file = Path(tmpdir) / "test-cache.json"
 
             # First run - issue should be processed
-            with patch("monitor_github_notify.requests.post") as mock_post:
+            with patch("src.monitor_github_notify.requests.post") as mock_post:
                 monitor.run()
                 mock_post.assert_called_once()
 
             # Second run - same issue should be filtered out
-            with patch("monitor_github_notify.requests.post") as mock_post:
+            with patch("src.monitor_github_notify.requests.post") as mock_post:
                 monitor.run()
                 mock_post.assert_not_called()
 
@@ -182,7 +178,7 @@ class TestIntegration:
 class TestErrorHandling:
     """Test error handling scenarios."""
 
-    @patch("monitor_github_notify.Github")
+    @patch("src.monitor_github_notify.Github")
     def test_github_api_error_handling(
         self, mock_github_class, sample_config, mock_github_token
     ):
@@ -196,8 +192,8 @@ class TestErrorHandling:
         with pytest.raises(Exception, match="GitHub API Error"):
             monitor.run()
 
-    @patch("monitor_github_notify.Github")
-    @patch("monitor_github_notify.requests.post")
+    @patch("src.monitor_github_notify.Github")
+    @patch("src.monitor_github_notify.requests.post")
     def test_slack_error_handling(
         self, mock_post, mock_github_class, sample_config, mock_github_token
     ):

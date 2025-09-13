@@ -104,7 +104,7 @@ def test_config_validation():
 
 ### Testing with Mocks
 ```python
-@patch('monitor_github_notify.requests.post')
+@patch('src.monitor_github_notify.requests.post')
 def test_slack_notification(mock_post):
     mock_post.return_value.raise_for_status.return_value = None
     # Test Slack notification logic

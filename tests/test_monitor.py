@@ -2,17 +2,13 @@
 
 import json
 import os
-import sys
 import unittest
 from datetime import datetime
 from unittest.mock import Mock, mock_open, patch
 
 import requests
 
-# Add src to path for imports
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
-
-from monitor_github_notify import GitHubIssueMonitor
+from src.monitor_github_notify import GitHubIssueMonitor
 
 
 class TestGitHubIssueMonitor(unittest.TestCase):
@@ -70,7 +66,7 @@ class TestGitHubIssueMonitor(unittest.TestCase):
         with patch.dict(os.environ, {"GITHUB_TOKEN": "fake_token"}):
             monitor = GitHubIssueMonitor(self.test_config)
 
-        with patch("monitor_github_notify.datetime") as mock_datetime:
+        with patch("src.monitor_github_notify.datetime") as mock_datetime:
             mock_datetime.now.return_value = datetime(2024, 1, 15, 12, 0, 0)
             query = monitor.build_search_query()
 
@@ -84,7 +80,7 @@ class TestGitHubIssueMonitor(unittest.TestCase):
         with patch.dict(os.environ, {"GITHUB_TOKEN": "fake_token"}):
             monitor = GitHubIssueMonitor(self.test_config)
 
-        with patch("monitor_github_notify.datetime") as mock_datetime:
+        with patch("src.monitor_github_notify.datetime") as mock_datetime:
             mock_datetime.now.return_value = datetime(2024, 1, 15, 12, 0, 0)
             query = monitor.build_search_query()
 
@@ -101,7 +97,7 @@ class TestGitHubIssueMonitor(unittest.TestCase):
         with patch.dict(os.environ, {"GITHUB_TOKEN": "fake_token"}):
             monitor = GitHubIssueMonitor(config)
 
-        with patch("monitor_github_notify.datetime") as mock_datetime:
+        with patch("src.monitor_github_notify.datetime") as mock_datetime:
             mock_datetime.now.return_value = datetime(2024, 1, 15, 12, 0, 0)
             query = monitor.build_search_query()
 
@@ -189,7 +185,7 @@ class TestGitHubIssueMonitor(unittest.TestCase):
             written_data = "".join(call[0][0] for call in written_content)
             self.assertIn('"notified_issues"', written_data)
 
-    @patch("monitor_github_notify.requests.post")
+    @patch("src.monitor_github_notify.requests.post")
     def test_send_slack_notification_success(self, mock_post):
         """Test successful Slack notification sending."""
         mock_post.return_value.raise_for_status.return_value = None
@@ -210,7 +206,7 @@ class TestGitHubIssueMonitor(unittest.TestCase):
         self.assertIn("blocks", payload)
         self.assertEqual(payload["username"], "GitHub Monitor")
 
-    @patch("monitor_github_notify.requests.post")
+    @patch("src.monitor_github_notify.requests.post")
     def test_send_slack_notification_disabled(self, mock_post):
         """Test Slack notification when disabled."""
         config = self.test_config.copy()
@@ -223,7 +219,7 @@ class TestGitHubIssueMonitor(unittest.TestCase):
 
         mock_post.assert_not_called()
 
-    @patch("monitor_github_notify.requests.post")
+    @patch("src.monitor_github_notify.requests.post")
     def test_send_slack_notification_error(self, mock_post):
         """Test Slack notification error handling."""
         mock_post.side_effect = requests.exceptions.RequestException("Network error")
@@ -261,7 +257,7 @@ class TestGitHubIssueMonitor(unittest.TestCase):
             # Should not create file for empty list
             mock_file.assert_not_called()
 
-    @patch("monitor_github_notify.Github")
+    @patch("src.monitor_github_notify.Github")
     def test_search_issues_success(self, mock_github_class):
         """Test successful issue searching."""
         # Mock GitHub issue object
@@ -289,7 +285,7 @@ class TestGitHubIssueMonitor(unittest.TestCase):
         self.assertEqual(result[0]["title"], "Test Issue")
         self.assertEqual(result[0]["repository"], "test/repo")
 
-    @patch("monitor_github_notify.Github")
+    @patch("src.monitor_github_notify.Github")
     def test_search_issues_filters_pull_requests(self, mock_github_class):
         """Test that pull requests are filtered out from search results."""
         # Mock GitHub issue (should be included)
@@ -322,7 +318,7 @@ class TestGitHubIssueMonitor(unittest.TestCase):
         self.assertEqual(len(result), 1)
         self.assertEqual(result[0]["id"], 12345)
 
-    @patch("monitor_github_notify.Github")
+    @patch("src.monitor_github_notify.Github")
     def test_search_issues_api_error(self, mock_github_class):
         """Test handling of GitHub API errors."""
         mock_github = Mock()
