@@ -259,14 +259,15 @@ jobs:
 
           # Check for invalid characters in artifact names
           echo "Checking artifact names for invalid characters..."
-          if grep -r "name:.*/" .github/workflows/ || \
-             grep -r 'name:.*\\' .github/workflows/ || \
-             grep -r 'name:.*"' .github/workflows/ || \
-             grep -r 'name:.*<' .github/workflows/ || \
-             grep -r 'name:.*>' .github/workflows/ || \
-             grep -r 'name:.*|' .github/workflows/ || \
-             grep -r 'name:.*\*' .github/workflows/ || \
-             grep -r 'name:.*?' .github/workflows/; then
+          # Exclude the validation rules themselves from the search
+          if grep -r "name:.*/" .github/workflows/ | grep -v "grep -r" || \
+             grep -r 'name:.*\\' .github/workflows/ | grep -v "grep -r" || \
+             grep -r 'name:.*"' .github/workflows/ | grep -v "grep -r" || \
+             grep -r 'name:.*<' .github/workflows/ | grep -v "grep -r" || \
+             grep -r 'name:.*>' .github/workflows/ | grep -v "grep -r" || \
+             grep -r 'name:.*|' .github/workflows/ | grep -v "grep -r" || \
+             grep -r 'name:.*\*' .github/workflows/ | grep -v "grep -r" || \
+             grep -r 'name:.*?' .github/workflows/ | grep -v "grep -r"; then
             echo "❌ Found artifact names with invalid characters"
             echo "Artifact names cannot contain: / \\ \" < > | * ?"
             echo "Use safe alternatives like dashes or underscores"
@@ -275,7 +276,8 @@ jobs:
 
           # Check for direct matrix.config usage in artifact names
           echo "Checking for unsafe matrix variable usage in artifacts..."
-          if grep -r "name:.*matrix\.config" .github/workflows/; then
+          if grep -r "name:.*matrix\.config" .github/workflows/ | \
+             grep -v "grep -r"; then
             echo "❌ Found direct matrix.config usage in artifact names"
             echo "matrix.config often contains paths with forward slashes"
             echo "Use a safe transformation like" \
