@@ -1,9 +1,9 @@
 ---
-name: Greenboot Monitor
+name: FDO Monitor
 
 on:
   schedule:
-    - cron: '0 */2 * * *'
+    - cron: '0 6 * * *'
   workflow_dispatch:
 
 jobs:
@@ -29,7 +29,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          CONFIG_FILE: 'configs/greenboot.json'
+          CONFIG_FILE: 'configs/fdo.json'
         run: |
           python src/monitor_github_notify.py
           if [ -f new_issues.json ]; then
