@@ -83,7 +83,7 @@ Edit your config file (e.g., `configs/template.json.example`):
 ### Manual Test
 
 ```bash
-# Set environment variables
+# Set environment variables (see README.md Authentication Setup section for GITHUB_TOKEN)
 export GITHUB_TOKEN="your_github_token"
 export SLACK_WEBHOOK_URL="your_webhook_url"
 export CONFIG_FILE="configs/template.json.example"

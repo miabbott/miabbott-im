@@ -21,9 +21,63 @@ The tool creates GitHub issues for notifications.
 
 Simply ensure your repository has:
 - Issues enabled (Settings → Features → Issues)
-- `GITHUB_TOKEN` secret (usually auto-provided by GitHub Actions)
 
-### 2. Create Your First Monitor
+### 2. Authentication Setup
+
+#### For GitHub Actions (Recommended)
+
+When running in GitHub Actions, the `GITHUB_TOKEN` is **automatically provided** - no additional setup needed! GitHub Actions automatically injects this token with the necessary permissions.
+
+#### For Local Development & Testing
+
+To run the tool locally or in other CI environments, you'll need to create a Personal Access Token:
+
+**Step 1: Create Personal Access Token**
+1. Go to [GitHub Settings → Personal Access Tokens](https://github.com/settings/tokens)
+2. Click **"Generate new token (classic)"**
+3. Give it a descriptive name: `"Issue Monitor - Local Development"`
+4. Set expiration (recommend 90 days for security)
+5. Select the **`public_repo`** scope (read access to public repositories)
+6. Click **"Generate token"**
+7. **Copy the token immediately** (you won't see it again!)
+
+**Step 2: Set Environment Variable**
+```bash
+# Export the token (replace with your actual token)
+export GITHUB_TOKEN="ghp_your_token_here"
+
+# Verify it's set
+echo $GITHUB_TOKEN
+```
+
+**Step 3: Test Authentication**
+```bash
+# Test with a config file
+export CONFIG_FILE="configs/template.json.example"
+python src/monitor_github_notify.py
+```
+
+#### Security Best Practices
+
+- ⚠️ **Never commit tokens** to your repository
+- 🔄 **Rotate tokens regularly** (every 90 days)
+- 🔒 **Use minimal permissions** (`public_repo` scope only)
+- 📝 **Use descriptive token names** for easier management
+- 🗑️ **Delete unused tokens** from GitHub settings
+
+#### Troubleshooting
+
+**"GITHUB_TOKEN environment variable is required"**
+- Token not set: Run `export GITHUB_TOKEN="your_token"`
+- Token expired: Generate a new token in GitHub settings
+- Wrong scope: Ensure token has `public_repo` permission
+
+**Rate limit errors**
+- Unauthenticated: 60 requests/hour (very limited)
+- Authenticated: 5,000 requests/hour (recommended)
+- Search API: Requires authentication (no unauthenticated access)
+
+### 3. Create Your First Monitor
 
 Copy `configs/template.json.example` to create your own monitor (e.g., `configs/my-monitor.json`):
 
@@ -56,7 +110,7 @@ Copy `configs/template.json.example` to create your own monitor (e.g., `configs/
 }
 ```
 
-### 3. Automatic Workflow Execution
+### 4. Automatic Workflow Execution
 
 The universal GitHub Actions workflow (`.github/workflows/monitors.yml`) automatically:
 - **Discovers** all JSON config files in `configs/` directory
@@ -173,7 +227,7 @@ Each monitor creates GitHub issues with distinct labels like `monitor-security-m
 Test your configuration manually:
 
 ```bash
-# Set environment variables
+# Set environment variables (see Authentication Setup section for token creation)
 export GITHUB_TOKEN="your_token"
 export CONFIG_FILE="configs/your-monitor.json"  # Point to your config
 
