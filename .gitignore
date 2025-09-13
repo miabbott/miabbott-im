@@ -50,6 +50,9 @@ new_issues.json
 cache/
 *.log
 
+# Security scan reports
+bandit*.json
+
 # Virtual environments
 .env
 .env.*
