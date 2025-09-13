@@ -121,8 +121,8 @@ jobs:
           echo "Checking README.md references..."
 
           # Extract file references from README.md and check they exist
-          grep -o 'configs/[^`,)]*\.json[^`,)\s]*' README.md | \
-            sed 's/`//g' | \
+          grep -o 'configs/[^`,)"]*\.json[^`,)"]*' README.md | \
+            sed 's/`//g' | sed 's/".*$//' | \
             while read file; do
             if [[ "$file" == *"example"* ]] || \
                [[ "$file" == *"template"* ]] || \
