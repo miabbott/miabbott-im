@@ -224,16 +224,11 @@ jobs:
 
       - name: Validate workflow syntax
         run: |
-          # Use act to validate GitHub Actions workflow syntax
-          # Install act if available or use alternative validation
-          curl -s https://api.github.com/repos/nektos/act/releases/latest | \
-            grep "browser_download_url.*linux_amd64" | \
-            cut -d '"' -f 4 | head -n 1 | \
-            xargs curl -L -o act.tar.gz
-          tar xzf act.tar.gz
-          chmod +x act
-          ./act -n --workflows .github/workflows/keyword-example.yml || \
-            true
+          # Validate all GitHub Actions workflow syntax with yamllint
+          pip install yamllint
+          echo "Validating all workflow YAML syntax..."
+          yamllint .github/workflows/
+          echo "✅ All workflow syntax validation completed"
 
   notify:
     name: Notify Results
