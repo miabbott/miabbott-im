@@ -185,7 +185,8 @@ jobs:
               body += `- **Author:** \`${issue.user}\`\n`;
               body += `- **Created:** ${
                 new Date(issue.created_at).toLocaleString()}\n`;
-              body += `- **Issue ID:** \`#${issue.html_url.split('/').pop()}\`\n\n`;
+              body += `- **Issue ID:** \`#${
+                issue.html_url.split('/').pop()}\`\n\n`;
 
               if (issue.body && issue.body.length > 0) {
                 const preview = issue.body.substring(0, 200);
