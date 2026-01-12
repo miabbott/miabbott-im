@@ -117,7 +117,7 @@ class GitHubIssueMonitor:
             return False
 
         try:
-            from langdetect import detect, LangDetectException
+            from langdetect import LangDetectException, detect
 
             # Combine title and body for better language detection
             text = f"{issue['title']} {issue['body']}"
@@ -130,7 +130,7 @@ class GitHubIssueMonitor:
             detected_lang = detect(text)
 
             # Return True if not English (langdetect uses 'en' for English)
-            if detected_lang != 'en':
+            if detected_lang != "en":
                 print(
                     f"   🌐 Filtered non-English issue ({detected_lang}): "
                     f"{issue['title'][:50]}..."
@@ -139,10 +139,7 @@ class GitHubIssueMonitor:
 
         except LangDetectException:
             # If detection fails, don't filter it out (benefit of doubt)
-            print(
-                f"   ⚠️  Could not detect language for: "
-                f"{issue['title'][:50]}..."
-            )
+            print(f"   ⚠️  Could not detect language for: " f"{issue['title'][:50]}...")
             return False
         except Exception as e:
             print(f"   ⚠️  Language detection error: {e}")
