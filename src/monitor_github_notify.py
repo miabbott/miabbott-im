@@ -110,6 +110,46 @@ class GitHubIssueMonitor:
 
         return False
 
+    def is_non_english(self, issue: Dict[str, Any]) -> bool:
+        """Check if issue appears to be in a non-English language."""
+        # Only filter if language filtering is enabled
+        if not self.config.get("filterNonEnglish", False):
+            return False
+
+        try:
+            from langdetect import detect, LangDetectException
+
+            # Combine title and body for better language detection
+            text = f"{issue['title']} {issue['body']}"
+
+            # Skip if text is too short (< 20 chars) to avoid false positives
+            if len(text.strip()) < 20:
+                return False
+
+            # Detect language
+            detected_lang = detect(text)
+
+            # Return True if not English (langdetect uses 'en' for English)
+            if detected_lang != 'en':
+                print(
+                    f"   🌐 Filtered non-English issue ({detected_lang}): "
+                    f"{issue['title'][:50]}..."
+                )
+                return True
+
+        except LangDetectException:
+            # If detection fails, don't filter it out (benefit of doubt)
+            print(
+                f"   ⚠️  Could not detect language for: "
+                f"{issue['title'][:50]}..."
+            )
+            return False
+        except Exception as e:
+            print(f"   ⚠️  Language detection error: {e}")
+            return False
+
+        return False
+
     def send_slack_notification(self, issues: List[Dict[str, Any]]):
         """Send Slack notification with new issues."""
         slack_config = self.config.get("notifications", {}).get("slack", {})
@@ -229,6 +269,7 @@ class GitHubIssueMonitor:
                 for issue in issues
                 if issue["id"] not in cache["notified_issues"]
                 and not self.is_excluded(issue)
+                and not self.is_non_english(issue)
             ]
 
             print(f"🆕 {len(new_issues)} new issues to notify about")

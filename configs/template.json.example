@@ -17,6 +17,7 @@
     "another-org"
   ],
   "lookbackHours": 24,
+  "filterNonEnglish": false,
   "notifications": {
     "githubIssues": {
       "enabled": true
