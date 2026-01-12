@@ -11,6 +11,7 @@
     "fedora-iot"
   ],
   "lookbackHours": 24,
+  "filterNonEnglish": true,
   "notifications": {
     "githubIssues": {
       "enabled": true
