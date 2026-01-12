@@ -13,6 +13,7 @@
     "fido-device-onboard"
   ],
   "lookbackHours": 24,
+  "filterNonEnglish": true,
   "notifications": {
     "githubIssues": {
       "enabled": true
