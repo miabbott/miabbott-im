@@ -129,6 +129,114 @@ class TestGitHubIssueMonitor(unittest.TestCase):
         normal_issue = {"repository": "normalorg/repo"}
         self.assertFalse(monitor.is_excluded(normal_issue))
 
+    def test_is_non_english_disabled(self):
+        """Test language filtering when disabled (default)."""
+        with patch.dict(os.environ, {"GITHUB_TOKEN": "fake_token"}):
+            monitor = GitHubIssueMonitor(self.test_config)
+
+        # When filterNonEnglish is not enabled, should always return False
+        french_issue = {
+            "title": "Problème de sécurité critique",
+            "body": "Ceci est une description détaillée du problème de sécurité.",
+        }
+        self.assertFalse(monitor.is_non_english(french_issue))
+
+    @patch("langdetect.detect")
+    def test_is_non_english_english_issue(self, mock_detect):
+        """Test that English issues are not filtered."""
+        config = self.test_config.copy()
+        config["filterNonEnglish"] = True
+
+        with patch.dict(os.environ, {"GITHUB_TOKEN": "fake_token"}):
+            monitor = GitHubIssueMonitor(config)
+
+        mock_detect.return_value = "en"
+
+        english_issue = {
+            "title": "Critical security vulnerability found",
+            "body": "This is a detailed description of the security issue.",
+        }
+
+        self.assertFalse(monitor.is_non_english(english_issue))
+        mock_detect.assert_called_once()
+
+    @patch("langdetect.detect")
+    def test_is_non_english_non_english_issue(self, mock_detect):
+        """Test that non-English issues are filtered."""
+        config = self.test_config.copy()
+        config["filterNonEnglish"] = True
+
+        with patch.dict(os.environ, {"GITHUB_TOKEN": "fake_token"}):
+            monitor = GitHubIssueMonitor(config)
+
+        # Test French issue
+        mock_detect.return_value = "fr"
+
+        french_issue = {
+            "title": "Problème de sécurité critique",
+            "body": "Ceci est une description détaillée du problème de sécurité.",
+        }
+
+        self.assertTrue(monitor.is_non_english(french_issue))
+        mock_detect.assert_called_once()
+
+    @patch("langdetect.detect")
+    def test_is_non_english_short_text(self, mock_detect):
+        """Test that very short text is not filtered to avoid false positives."""
+        config = self.test_config.copy()
+        config["filterNonEnglish"] = True
+
+        with patch.dict(os.environ, {"GITHUB_TOKEN": "fake_token"}):
+            monitor = GitHubIssueMonitor(config)
+
+        short_issue = {"title": "Bug", "body": ""}
+
+        self.assertFalse(monitor.is_non_english(short_issue))
+        # detect should not be called for short text
+        mock_detect.assert_not_called()
+
+    @patch("langdetect.detect")
+    def test_is_non_english_detection_exception(self, mock_detect):
+        """Test handling of language detection exceptions."""
+        from langdetect import LangDetectException
+
+        config = self.test_config.copy()
+        config["filterNonEnglish"] = True
+
+        with patch.dict(os.environ, {"GITHUB_TOKEN": "fake_token"}):
+            monitor = GitHubIssueMonitor(config)
+
+        # Simulate LangDetectException
+        mock_detect.side_effect = LangDetectException("code", "message")
+
+        issue = {
+            "title": "Some issue title with enough text",
+            "body": "Issue body with more text to trigger detection",
+        }
+
+        # Should not filter when detection fails
+        self.assertFalse(monitor.is_non_english(issue))
+
+    @patch("langdetect.detect")
+    def test_is_non_english_generic_exception(self, mock_detect):
+        """Test handling of generic exceptions in language detection."""
+        config = self.test_config.copy()
+        config["filterNonEnglish"] = True
+
+        with patch.dict(os.environ, {"GITHUB_TOKEN": "fake_token"}):
+            monitor = GitHubIssueMonitor(config)
+
+        # Simulate generic exception
+        mock_detect.side_effect = Exception("Unexpected error")
+
+        issue = {
+            "title": "Some issue title with enough text",
+            "body": "Issue body with more text to trigger detection",
+        }
+
+        # Should not filter when detection fails
+        self.assertFalse(monitor.is_non_english(issue))
+
     def test_load_cache_existing(self):
         """Test loading existing cache file."""
         cache_data = {"notified_issues": [123, 456, 789]}
