@@ -112,8 +112,23 @@ class GitHubIssueMonitor:
 
     def is_non_english(self, issue: Dict[str, Any]) -> bool:
         """Check if issue appears to be in a non-English language."""
+        import sys
+
+        # Debug: Log entry and config value
+        filter_enabled = self.config.get("filterNonEnglish", False)
+        print(
+            f"   [DEBUG] is_non_english called for: {issue['title'][:40]}...",
+            flush=True,
+        )
+        print(
+            f"   [DEBUG] filterNonEnglish={filter_enabled} "
+            f"(type={type(filter_enabled).__name__})",
+            flush=True,
+        )
+
         # Only filter if language filtering is enabled
-        if not self.config.get("filterNonEnglish", False):
+        if not filter_enabled:
+            print("   [DEBUG] Language filtering disabled, returning False", flush=True)
             return False
 
         try:
@@ -124,28 +139,42 @@ class GitHubIssueMonitor:
             # actual content and causing false "English" detection
             body_sample = issue["body"][:500] if issue["body"] else ""
             text = f"{issue['title']} {body_sample}"
+            text_len = len(text.strip())
+            print(f"   [DEBUG] Text length (truncated): {text_len}", flush=True)
 
             # Skip if text is too short (< 20 chars) to avoid false positives
-            if len(text.strip()) < 20:
+            if text_len < 20:
+                print("   [DEBUG] Text too short, skipping detection", flush=True)
                 return False
 
             # Detect language
             detected_lang = detect(text)
+            print(f"   [DEBUG] Detected language: {detected_lang}", flush=True)
 
             # Return True if not English (langdetect uses 'en' for English)
             if detected_lang != "en":
                 print(
                     f"   🌐 Filtered non-English issue ({detected_lang}): "
-                    f"{issue['title'][:50]}..."
+                    f"{issue['title'][:50]}...",
+                    flush=True,
                 )
                 return True
+            else:
+                print("   [DEBUG] Issue is English, not filtering", flush=True)
 
         except LangDetectException:
             # If detection fails, don't filter it out (benefit of doubt)
-            print(f"   ⚠️  Could not detect language for: " f"{issue['title'][:50]}...")
+            print(
+                f"   ⚠️  Could not detect language for: {issue['title'][:50]}...",
+                flush=True,
+            )
             return False
         except Exception as e:
-            print(f"   ⚠️  Language detection error: {e}")
+            print(f"   ⚠️  Language detection error: {e}", flush=True)
+            import traceback
+
+            traceback.print_exc()
+            sys.stdout.flush()
             return False
 
         return False
@@ -262,6 +291,14 @@ class GitHubIssueMonitor:
             issues = self.search_issues()
 
             print(f"📊 Found {len(issues)} total issues")
+
+            # Debug: Log config before filtering
+            print(
+                f"[DEBUG] Config filterNonEnglish: "
+                f"{self.config.get('filterNonEnglish', 'NOT SET')}",
+                flush=True,
+            )
+            print(f"[DEBUG] Starting to filter {len(issues)} issues...", flush=True)
 
             # Filter new issues
             new_issues = [
