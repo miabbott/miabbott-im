@@ -119,8 +119,11 @@ class GitHubIssueMonitor:
         try:
             from langdetect import LangDetectException, detect
 
-            # Combine title and body for better language detection
-            text = f"{issue['title']} {issue['body']}"
+            # Combine title and first 500 chars of body for language detection
+            # Limiting body length prevents spam URLs from overwhelming the
+            # actual content and causing false "English" detection
+            body_sample = issue["body"][:500] if issue["body"] else ""
+            text = f"{issue['title']} {body_sample}"
 
             # Skip if text is too short (< 20 chars) to avoid false positives
             if len(text.strip()) < 20:
